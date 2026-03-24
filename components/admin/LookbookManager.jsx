@@ -52,21 +52,17 @@ export default function LookbookManager() {
   const [addForm, setAddForm] = useState({ url: '', titulo: '', badge: '', tamano: 'normal' })
   const [showPreview, setShowPreview] = useState(false)
 
-  // Load items on mount
-  useEffect(() => {
-    const { overrides: stored, order } = getStoredData()
-    setOverrides(stored)
-
-    // Merge defaults with overrides
-    let merged = defaultItems.map((item) => ({
+  const applyOverridesAndOrder = (baseItems, stored, order) => {
+    // Merge base items with overrides
+    let merged = baseItems.map((item) => ({
       ...item,
       ...(stored[item.id] || {}),
     }))
 
     // Add any custom items from overrides
-    const defaultIds = defaultItems.map((i) => i.id)
+    const baseIds = baseItems.map((i) => i.id)
     const customItems = Object.entries(stored)
-      .filter(([id]) => !defaultIds.includes(Number(id)))
+      .filter(([id]) => !baseIds.includes(Number(id)))
       .map(([id, data]) => ({ id: Number(id), ...data }))
     merged = [...merged, ...customItems]
 
@@ -77,14 +73,33 @@ export default function LookbookManager() {
         const found = merged.find((i) => i.id === id)
         if (found) ordered.push(found)
       })
-      // Add any items not in order
       merged.forEach((item) => {
         if (!order.includes(item.id)) ordered.push(item)
       })
       merged = ordered
     }
 
-    setItems(merged)
+    return merged
+  }
+
+  // Load items on mount, then fetch Sheets data
+  useEffect(() => {
+    const { overrides: stored, order } = getStoredData()
+    setOverrides(stored)
+
+    // Show defaults immediately
+    setItems(applyOverridesAndOrder(defaultItems, stored, order))
+
+    // Then fetch Sheets data
+    fetch('/api/data')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.lookbook?.length) {
+          const { overrides: freshOverrides, order: freshOrder } = getStoredData()
+          setItems(applyOverridesAndOrder(data.lookbook, freshOverrides, freshOrder))
+        }
+      })
+      .catch(() => {})
   }, [])
 
   const persistItems = (newItems, newOverrides) => {

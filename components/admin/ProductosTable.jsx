@@ -29,7 +29,9 @@ function saveOverrides(overrides) {
 
 export default function ProductosTable() {
   const [products, setProducts] = useState([])
+  const [baseProducts, setBaseProducts] = useState(defaultProductos)
   const [overrides, setOverrides] = useState({})
+  const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState(null)
   const [editField, setEditField] = useState(null) // 'precio' | 'stock'
   const [editValue, setEditValue] = useState('')
@@ -37,11 +39,30 @@ export default function ProductosTable() {
   useEffect(() => {
     const stored = getStoredOverrides()
     setOverrides(stored)
+
+    // Show defaults immediately
     const merged = defaultProductos.map((p) => ({
       ...p,
       ...(stored[p.id] || {}),
     }))
     setProducts(merged)
+
+    // Then fetch Sheets data
+    fetch('/api/data')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.productos?.length) {
+          const freshOverrides = getStoredOverrides()
+          const sheetsProducts = data.productos.map((p) => ({
+            ...p,
+            ...(freshOverrides[p.id] || {}),
+          }))
+          setProducts(sheetsProducts)
+          setBaseProducts(data.productos)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   const updateOverride = (id, changes) => {
