@@ -159,7 +159,7 @@ export default function ProductCard({ product, onQuickView, onAddToCart }) {
           {product.nombre}
         </h3>
         <div className="flex flex-wrap gap-1 mb-2">
-          {product.talles.map((talle) => (
+          {(product.talles || []).map((talle) => (
             <span
               key={talle}
               className="px-2 py-0.5 text-[10px] bg-gray-100 text-secondary rounded"

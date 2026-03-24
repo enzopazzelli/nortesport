@@ -182,7 +182,7 @@ export default function QuickViewModal({
               <div className="mb-6">
                 <h4 className="font-semibold text-sm text-primary mb-2">Talle</h4>
                 <div className="flex flex-wrap gap-2">
-                  {product.talles.map((talle) => {
+                  {(product.talles || []).map((talle) => {
                     const active = selectedSize === talle
                     return (
                       <button

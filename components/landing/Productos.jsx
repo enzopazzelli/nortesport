@@ -41,7 +41,7 @@ export default function Productos({ productos = [], onQuickView, onAddToCart }) 
     // Size filter
     if (
       filters.sizes.length > 0 &&
-      !filters.sizes.some((s) => product.talles.includes(s))
+      !filters.sizes.some((s) => (product.talles || []).includes(s))
     ) {
       return false
     }
