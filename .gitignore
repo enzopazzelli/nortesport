@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Original image folders (heavy, not needed in repo)
+BASICS/
+NAVY & GREY/
+
+# Debug
+npm-debug.log*
