@@ -5,9 +5,10 @@ import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
 import { testimonios as defaultTestimonios } from '@/lib/defaults'
 
 function getInitials(nombre) {
-  return nombre
+  return (nombre || '')
     .split(' ')
     .map((w) => w[0])
+    .filter(Boolean)
     .join('')
     .toUpperCase()
     .slice(0, 2)
