@@ -1,4 +1,5 @@
-import { Instagram, MessageCircle, Phone, MapPin, Clock } from 'lucide-react'
+import Link from 'next/link'
+import { Instagram, MessageCircle, Phone, MapPin, Clock, Settings } from 'lucide-react'
 import { negocio, navLinks, categorias } from '@/lib/config'
 
 export default function Footer() {
@@ -117,7 +118,16 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-gray-400">
           <p>&copy; 2026 {negocio.nombre} &middot; {negocio.ubicacion}</p>
-          <p>Hecho con &#x1f4aa; en Santiago del Estero</p>
+          <div className="flex items-center gap-3">
+            <p>Hecho con &#x1f4aa; en Santiago del Estero</p>
+            <Link
+              href="/admin"
+              className="text-gray-600 hover:text-gray-400 transition-colors"
+              title="Admin"
+            >
+              <Settings size={14} />
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
