@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
-import { testimonios } from '@/lib/config'
+import { testimonios as defaultTestimonios } from '@/lib/defaults'
 
 function getInitials(nombre) {
   return nombre
@@ -13,7 +13,7 @@ function getInitials(nombre) {
     .slice(0, 2)
 }
 
-export default function Testimonios() {
+export default function Testimonios({ items = defaultTestimonios }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const intervalRef = useRef(null)
@@ -34,7 +34,7 @@ export default function Testimonios() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const maxIndex = Math.max(0, testimonios.length - visibleCount)
+  const maxIndex = Math.max(0, items.length - visibleCount)
 
   const goTo = useCallback(
     (dir) => {
@@ -93,7 +93,7 @@ export default function Testimonios() {
                 transform: `translateX(-${currentIndex * (100 / visibleCount)}%)`,
               }}
             >
-              {testimonios.map((t) => (
+              {items.map((t) => (
                 <div
                   key={t.id}
                   className="flex-shrink-0 px-2"

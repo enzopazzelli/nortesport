@@ -68,7 +68,8 @@ Esta es la hoja principal. Cada fila representa un producto que se muestra en la
 | `Talles` | Talles disponibles separados por coma | Texto con comas | `S,M,L,XL` |
 | `ColorTemporada` | Color representativo de la temporada | Texto | `Borgona` |
 | `Badge` | Etiqueta especial del producto. Valores posibles: `NUEVO`, `SALE`, `ULTIMAS`, o dejar vacio | Texto o vacio | `NUEVO` |
-| `ImagenURL` | Link de la imagen del producto (ver seccion de Google Drive) | URL | `https://drive.google.com/file/d/ABC123/view` |
+| `ImagenURL` | Links de las imagenes del producto separados por `\|`. La primera imagen es la principal. Se pueden agregar varias para que el producto tenga un carrusel de fotos (ver seccion de Google Drive) | URLs separadas por `\|` | `https://drive.google.com/.../foto1 \| https://drive.google.com/.../foto2 \| https://drive.google.com/.../foto3` |
+| `Stock` | Cantidad disponible del producto. Cuando es `0`, el producto se muestra como "Sin stock" (visible pero no se puede comprar). Dejar vacio para stock ilimitado | Numero o vacio | `10` |
 | `Destacado` | Si el producto aparece en la seccion destacados | `TRUE` o `FALSE` | `TRUE` |
 | `Disponible` | Si el producto esta visible en la tienda | `TRUE` o `FALSE` | `TRUE` |
 | `Orden` | Numero para ordenar los productos (menor = primero) | Numero | `1` |
@@ -77,9 +78,9 @@ Esta es la hoja principal. Cada fila representa un producto que se muestra en la
 
 | ID | Nombre | Categoria | Descripcion | Precio | PrecioAnterior | Talles | ColorTemporada | Badge | ImagenURL | Destacado | Disponible | Orden |
 |----|--------|-----------|-------------|--------|----------------|--------|----------------|-------|-----------|-----------|------------|-------|
-| 1 | Calza larga deportiva | Calzas largas | Calza larga con cintura alta y tela suplex de alta compresion. | 18500 | | S,M,L,XL | Borgona | NUEVO | https://drive.google.com/file/d/ABC123/view | TRUE | TRUE | 1 |
-| 2 | Short running | Shorts | Short liviano con tela respirable. Cintura elastica con cordon. | 11500 | 14000 | S,M,L | Borgona | SALE | https://drive.google.com/file/d/DEF456/view | FALSE | TRUE | 2 |
-| 3 | Remera dry-fit oversize | Remeras | Remera oversize de tela dry-fit. Secado rapido. | 12000 | | S,M,L,XL | Borgona | | | FALSE | TRUE | 3 |
+| 1 | Calza larga deportiva | Calzas largas | Calza larga con cintura alta y tela suplex de alta compresion. | 18500 | | S,M,L,XL | Borgona | NUEVO | https://drive.google.com/.../foto1 \| https://drive.google.com/.../foto2 \| https://drive.google.com/.../foto3 | TRUE | TRUE | 1 |
+| 2 | Short running | Shorts | Short liviano con tela respirable. Cintura elastica con cordon. | 11500 | 14000 | S,M,L | Borgona | SALE | https://drive.google.com/.../fotoA \| https://drive.google.com/.../fotoB | FALSE | TRUE | 2 |
+| 3 | Remera dry-fit oversize | Remeras | Remera oversize de tela dry-fit. Secado rapido. | 12000 | | S,M,L,XL | Borgona | | https://drive.google.com/.../fotoX | FALSE | TRUE | 3 |
 
 **Notas importantes sobre la hoja Productos:**
 
@@ -87,6 +88,30 @@ Esta es la hoja principal. Cada fila representa un producto que se muestra en la
 - **El Badge puede quedar vacio.** Si no queres mostrar ninguna etiqueta, simplemente deja la celda sin contenido.
 - **PrecioAnterior vacio** significa que el producto no tiene descuento. Si pones un valor, el sitio mostrara el precio tachado y el nuevo precio.
 - **Disponible en FALSE** oculta el producto del sitio sin eliminarlo. Util para productos temporalmente sin stock.
+- **Stock en 0** no oculta el producto — lo muestra con un cartel de "Sin stock", la imagen en gris, y sin boton de agregar al carrito. En la vista rapida (Quick View) aparece un boton para consultar por WhatsApp. Esto es util para que las clientas vean que el producto existe aunque no este disponible.
+- **Stock vacio (sin valor)** se interpreta como stock ilimitado — el producto se muestra normalmente.
+- **Diferencia entre Disponible y Stock:** `Disponible = FALSE` oculta completamente el producto. `Stock = 0` lo muestra como "Sin stock". Usa `Disponible` para productos que ya no vendes y `Stock` para productos temporalmente agotados.
+
+#### Multiples fotos por producto (Carrusel)
+
+Cada producto puede tener **varias fotos** que se muestran como un carrusel. Para esto, en la columna `ImagenURL` se ponen todos los links separados por el caracter `|` (barra vertical):
+
+```
+https://drive.google.com/.../foto-frente | https://drive.google.com/.../foto-espalda | https://drive.google.com/.../foto-detalle
+```
+
+**Como funciona en la tienda:**
+
+- **En la grilla de productos:** se muestran flechas izquierda/derecha al pasar el mouse, y puntos indicadores debajo de la imagen para cambiar entre fotos.
+- **En la vista rapida (Quick View):** se muestra un carrusel con flechas, un contador (ej: "1/3") y una fila de miniaturas (thumbnails) clicables debajo de la foto principal.
+- **En el carrito:** se usa la primera foto como miniatura.
+
+**Recomendaciones:**
+
+- La **primera URL** es la foto principal (la que se ve al cargar la pagina).
+- Se recomienda entre **2 y 5 fotos** por producto: frente, espalda, detalle, puesta, etc.
+- Si solo pones una URL (sin `|`), funciona igual — simplemente no se muestra el carrusel.
+- Si la celda esta vacia, se muestra un gradiente placeholder.
 - **La columna Orden** determina el orden de aparicion. Si dos productos tienen el mismo numero, se muestran en el orden en que estan en la hoja.
 
 **Categorias utilizadas actualmente:**
@@ -293,8 +318,8 @@ Una vez que tenes el Sheet ID, necesitas ponerlo en el archivo de configuracion 
 
 **Paso a paso:**
 
-1. Abri el archivo `lib/config.js` en el editor de codigo.
-2. Busca la ultima linea del archivo, que dice:
+1. Abri el archivo `lib/admin.js` en el editor de codigo.
+2. Busca la linea que dice:
 
 ```javascript
 export const SHEET_ID = 'TU_GOOGLE_SHEET_ID_AQUI'
@@ -309,7 +334,7 @@ export const SHEET_ID = '1aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'
 4. Guarda el archivo.
 5. Si el sitio esta corriendo localmente, los cambios se aplican automaticamente. Si esta en produccion (Vercel), necesitas hacer deploy nuevamente.
 
-> **Archivo:** `lib/config.js` -- linea final del archivo.
+> **Archivo:** `lib/admin.js`
 
 ---
 
@@ -342,9 +367,9 @@ https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:json&sheet={No
 - Despues de 5 minutos, la proxima visita obtiene los datos actualizados.
 - Esto es para evitar hacer demasiadas solicitudes a Google y que el sitio cargue mas rapido.
 
-**Fallback a datos mock:**
+**Fallback a datos de respaldo:**
 
-Si por cualquier razon el sitio no puede conectarse a Google Sheets (hoja no disponible, error de red, Sheet ID incorrecto), automaticamente usa los **datos de respaldo** que estan dentro del archivo `lib/config.js`. Esto garantiza que el sitio nunca quede "en blanco".
+Si por cualquier razon el sitio no puede conectarse a Google Sheets (hoja no disponible, error de red, Sheet ID incorrecto), automaticamente usa los **datos de respaldo** que estan dentro del archivo `lib/defaults.js`. Esto garantiza que el sitio nunca quede "en blanco".
 
 ---
 
@@ -505,18 +530,28 @@ Cualquiera de estos formatos funciona. La funcion extrae el `FILE_ID` y genera e
 
 ### 2.6 Usar en la hoja de Sheets
 
-1. Subi la imagen a Google Drive (seccion 2.2).
-2. Hace la imagen publica (seccion 2.3).
-3. Copia el link de compartir.
-4. Pegalo en la columna `ImagenURL` del producto correspondiente en tu hoja de Sheets.
+1. Subi las imagenes a Google Drive (seccion 2.2).
+2. Hace cada imagen publica (seccion 2.3).
+3. Copia los links de compartir.
+4. Pegalos en la columna `ImagenURL` del producto correspondiente en tu hoja de Sheets.
 
-**Ejemplo en la hoja:**
+**Si el producto tiene UNA sola foto:**
 
 | ID | Nombre | ... | ImagenURL |
 |----|--------|-----|-----------|
-| 1 | Calza larga deportiva | ... | https://drive.google.com/file/d/1aBcDeFgHiJkLmNoPqRsTuVwXyZ/view?usp=sharing |
+| 1 | Calza larga deportiva | ... | https://drive.google.com/file/d/1aBcDeFg/view?usp=sharing |
 
-El sitio convierte automaticamente ese link al formato que necesita para mostrar la imagen.
+**Si el producto tiene VARIAS fotos (carrusel):**
+
+Separa los links con `|` (barra vertical). La primera foto es la principal:
+
+| ID | Nombre | ... | ImagenURL |
+|----|--------|-----|-----------|
+| 1 | Calza larga deportiva | ... | https://drive.google.com/file/d/FOTO_FRENTE/view \| https://drive.google.com/file/d/FOTO_ESPALDA/view \| https://drive.google.com/file/d/FOTO_DETALLE/view |
+
+Esto genera un **carrusel de fotos** en la tienda: flechas para navegar, puntos indicadores en la grilla, y thumbnails en la vista rapida.
+
+El sitio convierte automaticamente cada link al formato que necesita para mostrar las imagenes.
 
 ---
 
@@ -528,7 +563,7 @@ Actualmente, el sitio usa **fotos reales almacenadas localmente** en `/public/`:
 - **Lookbook:** `/public/lookbook/[nombre-look].jpg`
 - **Hero:** `/public/hero/hero-bg.jpg`
 
-Cada producto y lookbook item en `config.js` tiene un campo `imagenUrl` que apunta a su foto real. Los componentes (ProductCard, QuickViewModal, Lookbook, Hero, CarritoPanel) muestran estas imagenes reales.
+Cada producto en `config.js` tiene un campo `imagenes` (array de URLs) que apunta a sus fotos reales (hasta 3 por producto). Cada lookbook item tiene `imagenUrl` con una foto. Los componentes (ProductCard, QuickViewModal, CarritoPanel, Lookbook, Hero) muestran estas imagenes reales con carrusel cuando hay multiples fotos.
 
 Si por algun motivo una imagen no se puede cargar (ruta incorrecta, archivo eliminado, o al usar Google Drive con link roto), el sitio **no muestra un espacio vacio ni un icono de error**. En su lugar, muestra un **degradado de colores** como fondo de respaldo.
 
@@ -575,7 +610,7 @@ El panel de administracion incluye un generador de catalogos en formato PDF. Per
    - Local: `http://localhost:3000/admin`
    - Produccion: `https://tu-dominio.com/admin`
 2. Se muestra una pantalla de login con el titulo "Norte Sport -- Admin".
-3. Ingresa la contrasena: **`nortesport2026`**
+3. Ingresa la contrasena (configurada en `lib/admin.js`): **`nortesport2026`**
 4. Hace clic en "Ingresar" o presiona Enter.
 5. Seras redirigido al dashboard de administracion.
 
@@ -672,9 +707,9 @@ El PDF tiene un diseno profesional con:
 
 ### 3.7 Personalizar colores y datos del PDF
 
-Los colores y datos del negocio que aparecen en el PDF se configuran en `lib/config.js`:
+Los colores del admin y PDF se configuran en `lib/admin.js`, y los datos del negocio en `lib/config.js`:
 
-**Colores del PDF:**
+**Colores del PDF** (`lib/admin.js`):
 
 ```javascript
 export const adminConfig = {
@@ -688,7 +723,7 @@ export const adminConfig = {
 }
 ```
 
-**Datos del negocio** (aparecen en el encabezado del PDF):
+**Datos del negocio** (`lib/config.js`) — aparecen en el encabezado del PDF:
 
 ```javascript
 export const negocio = {
@@ -700,7 +735,7 @@ export const negocio = {
 }
 ```
 
-Para cambiar cualquiera de estos valores, edita el archivo `lib/config.js` y guarda.
+Para cambiar cualquiera de estos valores, edita el archivo correspondiente y guarda.
 
 ---
 
@@ -955,7 +990,7 @@ El lookbook se puede administrar desde el panel de admin, en la pestana **"Lookb
 
 **Restaurar valores originales:**
 
-- Hace clic en **"Restaurar"** para volver a los items por defecto del archivo de configuracion.
+- Hace clic en **"Restaurar"** para volver a los items por defecto de `defaults.js`.
 - Se pide confirmacion antes de restaurar.
 - ATENCION: Esto elimina todos los cambios que hayas hecho desde el admin.
 
@@ -978,15 +1013,66 @@ Los cambios hechos desde el admin del lookbook se guardan en el **localStorage**
 
 ## 7. Gestion de Productos (Admin)
 
-La pestana **"Productos"** del panel de admin permite hacer ajustes rapidos a los productos.
+La pestana **"Productos"** del panel de admin permite ver y hacer ajustes rapidos a los productos.
 
-### 7.1 Acceder al gestor de productos
+### 7.1 De donde salen los datos que se ven en el admin?
 
-1. Ingresa al panel de admin.
+> **MUY IMPORTANTE:** Actualmente la tabla del admin muestra los datos de `lib/config.js` (los datos que vienen con el sitio). **NO lee de Google Sheets.**
+
+**Flujo actual de datos:**
+
+```
+Google Sheets  ──>  Pagina publica (landing page)
+                     ↑ fallback si Sheets falla
+defaults.js   ──>  Panel admin (siempre)
+                     ↑ + overrides de localStorage
+```
+
+**Esto significa:**
+
+| Donde | Que datos muestra |
+|-------|-------------------|
+| **Pagina publica** (lo que ven tus clientas) | Datos de Google Sheets si esta configurado. Si no, usa defaults.js como respaldo |
+| **Panel admin** (tabla de productos) | Siempre muestra defaults.js + cambios que hayas hecho desde el admin |
+
+**En resumen:**
+
+- Si agregas un producto nuevo en Google Sheets → **se ve en la tienda** pero **NO aparece en la tabla del admin**.
+- Si cambias un precio en Google Sheets → **se actualiza en la tienda** pero la tabla del admin sigue mostrando el precio de defaults.js.
+- Si cambias un precio en el admin → **solo se guarda en tu navegador** (localStorage). No modifica Sheets ni defaults.js.
+
+**Para que sirve entonces la tabla del admin?**
+
+- Para hacer **ajustes rapidos temporales** (cambiar precio, stock o disponibilidad) que solo vos ves en tu navegador.
+- Para tener una **vista rapida** de los productos base del sitio (de defaults.js).
+- En el futuro, si se implementa la Google Sheets API con escritura, el admin podria modificar Sheets directamente.
+
+### 7.2 Como se relacionan Sheets, config.js y el admin?
+
+```
+                    TU FLUJO DE TRABAJO
+                    ====================
+
+1. Cargas los productos en Google Sheets
+   (nombre, precio, talles, fotos, stock, etc.)
+          ↓
+2. La tienda lee Sheets cada 5 minutos
+   y muestra los datos actualizados a las clientas
+          ↓
+3. Si necesitas un ajuste urgente que no podes
+   hacer en Sheets, usas el admin para un override
+   temporal en tu navegador
+```
+
+**Recomendacion:** Gestiona TODO desde Google Sheets. Usa la tabla del admin solo como referencia rapida o para ajustes de emergencia.
+
+### 7.3 Acceder al gestor de productos
+
+1. Ingresa al panel de admin (`/admin`, contrasena: `nortesport2026`).
 2. Hace clic en la pestana **"Productos"** en la barra de navegacion.
-3. Veras una tabla con todos los productos.
+3. Veras una tabla con todos los productos de defaults.js.
 
-### 7.2 Funcionalidades disponibles
+### 7.4 Funcionalidades disponibles
 
 **Editar precio:**
 
@@ -995,6 +1081,14 @@ La pestana **"Productos"** del panel de admin permite hacer ajustes rapidos a lo
 3. Escribi el nuevo precio (solo numeros, sin $ ni puntos).
 4. Presiona **Enter** o hace clic en el tilde verde para guardar.
 5. Presiona **Escape** o la X para cancelar.
+
+**Editar stock:**
+
+1. Hace clic sobre el numero de stock de cualquier producto.
+2. Aparece un campo numerico editable.
+3. Escribi la nueva cantidad (0 = sin stock).
+4. Presiona **Enter** para guardar o **Escape** para cancelar.
+5. Los productos con stock 0 se muestran en rojo.
 
 **Cambiar disponibilidad:**
 
@@ -1010,26 +1104,40 @@ La pestana **"Productos"** del panel de admin permite hacer ajustes rapidos a lo
 - Hace clic para volver todos los productos a sus valores por defecto.
 - Se pide confirmacion.
 
-### 7.3 Informacion mostrada en la tabla
+### 7.5 Informacion mostrada en la tabla
 
-| Columna | Descripcion |
-|---------|-------------|
-| ID | Numero identificador del producto |
-| Nombre | Nombre del producto |
-| Categoria | Categoria a la que pertenece |
-| Precio | Precio actual (editable haciendo clic) |
-| Badge | Etiqueta (NUEVO, SALE, ULTIMAS) o guion si no tiene |
-| Disponible | Toggle Si/No para mostrar/ocultar el producto |
+| Columna | Descripcion | Editable |
+|---------|-------------|----------|
+| ID | Numero identificador del producto | No |
+| Nombre | Nombre del producto | No |
+| Categoria | Categoria a la que pertenece | No |
+| Precio | Precio actual | Si (click para editar) |
+| Stock | Cantidad disponible (rojo si es 0) | Si (click para editar) |
+| Badge | Etiqueta (NUEVO, SALE, ULTIMAS) o guion si no tiene | No |
+| Disponible | Toggle Si/No para mostrar/ocultar el producto | Si (click para toggle) |
 
-### 7.4 Donde se guardan los datos
+### 7.6 Donde se guardan los cambios del admin
 
-Al igual que el lookbook, los cambios de productos se guardan en **localStorage**:
+Los cambios hechos desde el admin se guardan en **localStorage** (almacenamiento del navegador):
 
 - Clave: `norte_productos_overrides`
-- Los cambios solo existen en tu navegador actual.
-- Se aplican como "sobreescrituras" sobre los datos originales de `lib/config.js`.
+- Los cambios **solo existen en tu navegador actual**. Si abris otro navegador o limpias la cache, se pierden.
+- Se aplican como "sobreescrituras" sobre los datos originales de `lib/defaults.js`.
+- **NO modifican Google Sheets.** Tus clientas no ven estos cambios — ellas ven lo que hay en Sheets.
 
-**Para produccion:** Los productos deberian gestionarse desde Google Sheets. Para tener escritura en Sheets desde el admin, se necesitaria implementar la Google Sheets API con autenticacion (escribir datos requiere una API key, a diferencia de leer que solo necesita la hoja publica).
+### 7.7 Entonces, donde debo gestionar mis productos?
+
+| Tarea | Donde hacerlo |
+|-------|---------------|
+| Agregar un producto nuevo | Google Sheets (agregar fila en hoja "Productos") |
+| Cambiar precio | Google Sheets (editar celda Precio) |
+| Actualizar stock | Google Sheets (editar celda Stock) |
+| Agregar/cambiar fotos | Google Drive (subir fotos) + Google Sheets (pegar links en ImagenURL) |
+| Ocultar producto temporalmente | Google Sheets (poner Disponible en FALSE) o Sheets (poner Stock en 0) |
+| Eliminar producto | Google Sheets (borrar la fila) |
+| Ajuste de emergencia rapido | Panel admin (se guarda solo en tu navegador) |
+
+> **Tip:** Los cambios en Google Sheets se reflejan en la tienda en un maximo de **5 minutos** (el sitio cachea los datos y los refresca cada 300 segundos).
 
 ---
 
@@ -1052,20 +1160,20 @@ Intenta cargar datos de Google Sheets
 
 **Cada seccion del sitio tiene su propio fallback:**
 
-| Seccion | Funcion | Datos mock (fallback) |
+| Seccion | Funcion | Datos de fallback |
 |---------|---------|----------------------|
-| Productos | `getProductos()` | `productos` en config.js (12 productos de ejemplo) |
-| Testimonios | `getTestimonios()` | `testimonios` en config.js (6 testimonios de ejemplo) |
-| Lookbook | `getLookbook()` | `lookbookItems` en config.js (8 items de ejemplo) |
-| Config (temporada, promos) | `getConfig()` | `temporadaActual` y `promos` en config.js |
+| Productos | `getProductos()` | `productos` en defaults.js (12 productos de ejemplo) |
+| Testimonios | `getTestimonios()` | `testimonios` en defaults.js (6 testimonios de ejemplo) |
+| Lookbook | `getLookbook()` | `lookbookItems` en defaults.js (8 items de ejemplo) |
+| Config (temporada, promos) | `getConfig()` | `temporadaActual` y `promos` en defaults.js |
 
-### 8.2 Como modificar los datos mock
+### 8.2 Como modificar los datos de fallback
 
-Los datos mock estan en `lib/config.js`. Son los datos que se muestran cuando Google Sheets no esta configurado o no esta disponible.
+Los datos de fallback estan en `lib/defaults.js`. Son los datos que se muestran cuando Google Sheets no esta configurado o no esta disponible.
 
-**Productos mock:**
+**Productos de fallback:**
 
-Busca el array `productos` en `config.js`. Cada producto tiene esta estructura:
+Busca el array `productos` en `defaults.js`. Cada producto tiene esta estructura:
 
 ```javascript
 {
@@ -1077,15 +1185,22 @@ Busca el array `productos` en `config.js`. Cada producto tiene esta estructura:
   precioAnterior: null,    // null = sin descuento
   talles: ['S', 'M', 'L', 'XL'],
   badge: 'NUEVO',          // 'NUEVO', 'SALE', 'ULTIMAS', o null
-  imagenUrl: '/productos/calza-larga-deportiva.jpg', // Ruta a foto real en /public/productos/
+  imagenes: [              // Array de fotos — la primera es la principal
+    '/productos/calza-larga-deportiva.jpg',
+    '/productos/calza-larga-deportiva-2.jpg',
+    '/productos/calza-larga-deportiva-3.jpg',
+  ],
   placeholder: 'linear-gradient(135deg, #2B3A52, #6B7B8D)', // Gradiente de fallback
+  stock: 10,              // Cantidad disponible. 0 = sin stock. null = ilimitado
   disponible: true,
 }
 ```
 
-Para modificar un producto mock, edita los valores directamente en el archivo.
+> **Nota:** En Sheets, las multiples fotos van en la misma celda `ImagenURL` separadas por `|`. En defaults.js, se usan como array `imagenes`. El sitio convierte automaticamente el formato de Sheets al array interno.
 
-**Testimonios mock:**
+Para modificar un producto de fallback, edita los valores directamente en el archivo.
+
+**Testimonios de fallback:**
 
 ```javascript
 {
@@ -1096,7 +1211,7 @@ Para modificar un producto mock, edita los valores directamente en el archivo.
 }
 ```
 
-**Lookbook mock:**
+**Lookbook de fallback:**
 
 ```javascript
 {
@@ -1109,21 +1224,21 @@ Para modificar un producto mock, edita los valores directamente en el archivo.
 }
 ```
 
-### 8.3 Cuando usar datos mock vs datos reales
+### 8.3 Cuando usar datos de fallback vs datos reales
 
 | Escenario | Que usar |
 |-----------|----------|
-| Desarrollo y pruebas locales | Datos mock (no necesitas configurar Sheets) |
-| Demo o presentacion | Datos mock con valores atractivos |
+| Desarrollo y pruebas locales | Datos de fallback (no necesitas configurar Sheets) |
+| Demo o presentacion | Datos de fallback con valores atractivos |
 | Sitio en produccion | Datos reales de Google Sheets |
-| Google Sheets tiene problemas temporales | Se usa automaticamente el fallback mock |
-| Queres probar un cambio rapido | Edita config.js, despues replica en Sheets |
+| Google Sheets tiene problemas temporales | Se usa automaticamente el fallback |
+| Queres probar un cambio rapido | Edita defaults.js, despues replica en Sheets |
 
-### 8.4 Verificar si el sitio usa datos reales o mock
+### 8.4 Verificar si el sitio usa datos reales o de fallback
 
-Si el `SHEET_ID` en `config.js` es `'TU_GOOGLE_SHEET_ID_AQUI'` (el valor por defecto), el sitio **siempre** usara datos mock porque no puede conectarse a ninguna hoja real.
+Si el `SHEET_ID` en `lib/admin.js` es `'TU_GOOGLE_SHEET_ID_AQUI'` (el valor por defecto), el sitio **siempre** usara datos de fallback porque no puede conectarse a ninguna hoja real.
 
-Una vez que configures un Sheet ID real y la hoja sea publica, el sitio intentara cargar los datos reales. Si falla, usara los mock como respaldo silencioso (no muestra ningun error al visitante).
+Una vez que configures un Sheet ID real y la hoja sea publica, el sitio intentara cargar los datos reales. Si falla, usara los de fallback como respaldo silencioso (no muestra ningun error al visitante).
 
 ---
 
@@ -1134,7 +1249,7 @@ Antes de lanzar el sitio al publico, segui esta lista de verificacion:
 ### 9.1 Checklist de produccion
 
 - [ ] **1. Configurar Google Sheets ID**
-  - Editar `lib/config.js`
+  - Editar `lib/admin.js`
   - Cambiar `SHEET_ID` por el ID real de tu hoja de calculo
   - Verificar que la hoja sea publica
 
@@ -1143,7 +1258,7 @@ Antes de lanzar el sitio al publico, segui esta lista de verificacion:
   - `negocio.whatsappDisplay`: `'385-478-8733'`
 
 - [ ] **3. Cambiar la contrasena del admin**
-  - Editar `lib/config.js`
+  - Editar `lib/admin.js`
   - Cambiar `adminConfig.password` de `'nortesport2026'` a una contrasena segura
   - **NO uses contrasenas simples** en produccion
 
@@ -1216,13 +1331,13 @@ Los datos se refrescan **cada 5 minutos** (300 segundos). Esto significa que si 
 
 ### Puedo usar otra hoja de calculo diferente?
 
-Si. Solo necesitas cambiar el `SHEET_ID` en `lib/config.js` por el ID de la nueva hoja. Asegurate de que la nueva hoja tenga las mismas pestanas y columnas con los mismos nombres.
+Si. Solo necesitas cambiar el `SHEET_ID` en `lib/admin.js` por el ID de la nueva hoja. Asegurate de que la nueva hoja tenga las mismas pestanas y columnas con los mismos nombres.
 
 ---
 
 ### Que pasa si Google Sheets se cae o no esta disponible?
 
-El sitio sigue funcionando normalmente. Usa automaticamente los **datos de respaldo** que estan en `lib/config.js`. El visitante no nota ninguna diferencia, excepto que los datos pueden no estar actualizados.
+El sitio sigue funcionando normalmente. Usa automaticamente los **datos de respaldo** que estan en `lib/defaults.js`. El visitante no nota ninguna diferencia, excepto que los datos pueden no estar actualizados.
 
 ---
 
@@ -1234,8 +1349,8 @@ El sitio sigue funcionando normalmente. Usa automaticamente los **datos de respa
 3. Agrega una nueva fila con todos los datos del producto.
 4. Espera hasta 5 minutos para que aparezca en el sitio.
 
-**Opcion B -- desde config.js (para testing):**
-1. Abre `lib/config.js`.
+**Opcion B -- desde defaults.js (para testing):**
+1. Abre `lib/defaults.js`.
 2. Agrega un nuevo objeto al array `productos` siguiendo la misma estructura.
 3. Guarda el archivo.
 
@@ -1247,8 +1362,8 @@ El sitio sigue funcionando normalmente. Usa automaticamente los **datos de respa
 1. Ve a la pestana "Config".
 2. Modifica los valores de `temporadaNombre`, `temporadaColor`, `temporadaColorNombre` y `temporadaEmoji`.
 
-**Desde config.js:**
-1. Edita el objeto `temporadaActual`:
+**Desde defaults.js:**
+1. Edita el objeto `temporadaActual` en `lib/defaults.js`:
 ```javascript
 export const temporadaActual = {
   nombre: 'Invierno 2026',
@@ -1268,8 +1383,8 @@ export const temporadaActual = {
 3. Separa cada texto con `|` (barra vertical).
 4. Ejemplo: `Envios gratis arriba de $25.000|Nuevos talles disponibles|3 cuotas sin interes`
 
-**Desde config.js:**
-1. Edita el array `promos`:
+**Desde defaults.js:**
+1. Edita el array `promos` en `lib/defaults.js`:
 ```javascript
 export const promos = [
   'Envios gratis arriba de $25.000',
@@ -1294,7 +1409,11 @@ Si. La columna `ImagenURL` acepta cualquier URL de imagen publica. Puede ser de:
 - ImgBB
 - Cualquier servidor que devuelva una imagen directamente
 
-Solo asegurate de que la URL sea publica y accesible sin autenticacion.
+Solo asegurate de que la URL sea publica y accesible sin autenticacion. Tambien podes mezclar servicios en un mismo producto usando el separador `|`:
+
+```
+https://drive.google.com/.../foto1 | https://i.imgur.com/foto2.jpg | https://res.cloudinary.com/.../foto3
+```
 
 ---
 
@@ -1342,8 +1461,30 @@ Para dar acceso de edicion:
 
 ---
 
+### Cuantas fotos puedo poner por producto?
+
+No hay un limite estricto, pero se recomienda entre **2 y 5 fotos** por producto. La primera foto es la principal (la que se ve primero en la grilla). Las demas se ven al navegar el carrusel.
+
+Para agregarlas, separa los links con `|` en la columna `ImagenURL` de Sheets:
+
+```
+link-foto-1 | link-foto-2 | link-foto-3
+```
+
+Si solo pones un link (sin `|`), no se muestra carrusel — solo la foto fija.
+
+---
+
+### El carrusel de fotos funciona en celular?
+
+Si. En celular las flechas del carrusel se muestran al tocar la imagen, y en la vista rapida (Quick View) aparecen los thumbnails y flechas de navegacion. El carrusel es completamente responsive.
+
+---
+
 > **Necesitas ayuda adicional?** Contacta al equipo de desarrollo o revisa el codigo fuente del proyecto. Los archivos principales de integracion estan en la carpeta `lib/`:
-> - `lib/config.js` -- Configuracion general y datos mock
+> - `lib/config.js` -- Datos del negocio (nombre, WhatsApp, Instagram, stats, navegacion)
+> - `lib/defaults.js` -- Datos de fallback (productos, testimonios, lookbook, FAQs, promos, temporada)
+> - `lib/admin.js` -- Configuracion del admin (contrasena, colores PDF, Sheet ID)
 > - `lib/sheets.js` -- Conexion con Google Sheets
 > - `lib/drive.js` -- Conversion de links de Google Drive
 > - `lib/excel-parser.js` -- Lectura de archivos Excel/CSV

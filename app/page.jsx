@@ -13,12 +13,39 @@ import Contacto from '@/components/landing/Contacto'
 import Footer from '@/components/landing/Footer'
 import CarritoPanel from '@/components/landing/CarritoPanel'
 import QuickViewModal from '@/components/landing/QuickViewModal'
-import { productos as productosConfig } from '@/lib/config'
+import {
+  productos as productosConfig,
+  testimonios as testimoniosConfig,
+  lookbookItems as lookbookConfig,
+  temporadaActual,
+  promos as promosConfig,
+} from '@/lib/defaults'
 
 export default function Home() {
   const [carrito, setCarrito] = useState([])
   const [carritoOpen, setCarritoOpen] = useState(false)
   const [quickViewProduct, setQuickViewProduct] = useState(null)
+
+  // Data from Sheets (or fallback to config)
+  const [productos, setProductos] = useState(productosConfig)
+  const [testimonios, setTestimonios] = useState(testimoniosConfig)
+  const [lookbook, setLookbook] = useState(lookbookConfig)
+  const [siteConfig, setSiteConfig] = useState({ temporada: temporadaActual, promos: promosConfig })
+
+  // Fetch data from Sheets via API route
+  useEffect(() => {
+    fetch('/api/data')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.productos?.length) setProductos(data.productos)
+        if (data.testimonios?.length) setTestimonios(data.testimonios)
+        if (data.lookbook?.length) setLookbook(data.lookbook)
+        if (data.config) setSiteConfig(data.config)
+      })
+      .catch(() => {
+        // Silently fallback to config.js data (already set as default)
+      })
+  }, [])
 
   // Load cart from localStorage
   useEffect(() => {
@@ -51,6 +78,7 @@ export default function Home() {
           precio: product.precio,
           talle,
           cantidad,
+          imagenes: product.imagenes || [],
           placeholder: product.placeholder,
         },
       ]
@@ -92,22 +120,22 @@ export default function Home() {
 
   return (
     <>
-      <PromoBar />
+      <PromoBar promos={siteConfig.promos} />
       <Navbar cartCount={cartCount} onCartToggle={() => setCarritoOpen(true)} />
 
       <main id="inicio">
-        <Hero />
+        <Hero temporada={siteConfig.temporada} />
 
         <section id="productos" className="scroll-reveal">
           <Productos
-            productos={productosConfig}
+            productos={productos}
             onQuickView={(product) => setQuickViewProduct(product)}
             onAddToCart={addToCart}
           />
         </section>
 
         <section id="lookbook" className="scroll-reveal">
-          <Lookbook />
+          <Lookbook items={lookbook} />
         </section>
 
         <section id="nosotras" className="scroll-reveal">
@@ -115,7 +143,7 @@ export default function Home() {
         </section>
 
         <section id="testimonios" className="scroll-reveal">
-          <Testimonios />
+          <Testimonios items={testimonios} />
         </section>
 
         <section id="faq" className="scroll-reveal">

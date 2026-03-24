@@ -205,7 +205,9 @@ norte-sport/
 |       |-- Modal.jsx                 # Modal reutilizable con overlay y animaciones
 |
 |-- lib/                              # Utilidades y configuracion
-|   |-- config.js                     # Configuracion central del negocio, productos, FAQs, etc.
+|   |-- config.js                     # Datos del negocio (nombre, WhatsApp, Instagram, stats, nav)
+|   |-- defaults.js                   # Datos de fallback (productos, testimonios, lookbook, FAQs, promos)
+|   |-- admin.js                      # Config del admin (contrasena, colores PDF, Sheet ID)
 |   |-- excel-parser.js              # Parseador de archivos Excel/CSV con SheetJS
 |   |-- pdf-generator.js             # Generador de catalogos PDF con jsPDF
 |   |-- sheets.js                     # Integracion con Google Sheets como fuente de datos
@@ -243,9 +245,9 @@ Componentes del dashboard administrativo. Incluyen formularios, tablas, gestores
 
 Componentes genericos de interfaz: Button, Card, Badge y Modal. Estan desacoplados de la logica de negocio y pueden reutilizarse en cualquier parte del proyecto.
 
-#### `/lib` — Utilidades y configuracion (5 archivos)
+#### `/lib` — Utilidades y configuracion (7 archivos)
 
-Modulos de JavaScript con la logica de negocio, configuracion del sitio, parseo de archivos, generacion de PDFs e integracion con servicios de Google.
+Modulos de JavaScript con la logica de negocio, configuracion del sitio, parseo de archivos, generacion de PDFs e integracion con servicios de Google. La configuracion esta dividida en tres archivos: `config.js` (datos del negocio), `defaults.js` (datos de fallback para cuando Sheets no responde) y `admin.js` (contrasena, colores PDF, Sheet ID).
 
 #### `/public` — Archivos estaticos
 
@@ -302,7 +304,7 @@ Barra fija en la parte superior del sitio que muestra las promociones activas co
 **Caracteristicas:**
 - **Animacion marquee:** El texto se duplica 4 veces y se desplaza con CSS `animation: marquee 30s linear infinite`.
 - **Cierre con sessionStorage:** Cuando la usuaria cierra la barra con el boton X, se guarda la clave `norte-promo-bar-closed` en `sessionStorage` con valor `"1"`. Al recargar la pagina (dentro de la misma sesion), la barra permanece oculta. Al cerrar el navegador y volver a entrar, la barra reaparece.
-- **Promociones configurables:** Lee el array `promos` desde `lib/config.js`. Las promociones por defecto son: envios, cuotas, descuento por transferencia y cambios sin costo.
+- **Promociones configurables:** Lee el array `promos` desde `lib/defaults.js` como fallback, pero acepta datos via props desde Google Sheets. Las promociones por defecto son: envios, cuotas, descuento por transferencia y cambios sin costo.
 
 ### 7.2 Navbar
 
@@ -529,7 +531,7 @@ Panel lateral de filtros para la seccion de productos.
 
 1. La usuaria accede a `/admin`.
 2. Se muestra un formulario minimalista con campo de contrasena (con toggle de visibilidad eye/eye-off).
-3. Al ingresar la contrasena correcta (definida en `adminConfig.password` de `config.js`), se guarda `authenticated: true` en `sessionStorage`.
+3. Al ingresar la contrasena correcta (definida en `adminConfig.password` de `lib/admin.js`), se guarda `authenticated: true` en `sessionStorage`.
 4. Se redirige a `/admin/dashboard`.
 5. Si la contrasena es incorrecta, se muestra un error "Contrasena incorrecta" con fondo rojo claro.
 6. El dashboard verifica la autenticacion al montar. Si no esta autenticada, redirige de vuelta a `/admin`.
@@ -1018,7 +1020,7 @@ export const negocio = {
 
 ### 15.2 Cambiar productos
 
-Editar el array `productos` en `lib/config.js`. Cada producto tiene la siguiente estructura:
+Editar el array `productos` en `lib/defaults.js`. Cada producto tiene la siguiente estructura:
 
 ```javascript
 {
@@ -1038,6 +1040,8 @@ Editar el array `productos` en `lib/config.js`. Cada producto tiene la siguiente
 
 ### 15.3 Cambiar categorias y talles
 
+En `lib/defaults.js`:
+
 ```javascript
 export const categorias = ['Calzas largas', 'Remeras', 'Shorts', 'Tops', 'Conjuntos']
 export const tallesDisponibles = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
@@ -1045,7 +1049,7 @@ export const tallesDisponibles = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 ### 15.4 Cambiar testimonios
 
-Editar el array `testimonios`. Cada testimonio:
+Editar el array `testimonios` en `lib/defaults.js`. Cada testimonio:
 
 ```javascript
 { id: 1, nombre: 'Nombre', texto: 'Texto del testimonio', estrellas: 5 }
@@ -1053,7 +1057,7 @@ Editar el array `testimonios`. Cada testimonio:
 
 ### 15.5 Cambiar FAQs
 
-Editar el array `faqs`. Cada FAQ:
+Editar el array `faqs` en `lib/defaults.js`. Cada FAQ:
 
 ```javascript
 { pregunta: 'Pregunta?', respuesta: 'Respuesta completa.' }
@@ -1061,11 +1065,11 @@ Editar el array `faqs`. Cada FAQ:
 
 ### 15.6 Cambiar items del Lookbook
 
-Editar el array `lookbookItems`. Cada item tiene `imagenUrl` apuntando a `/lookbook/[nombre-look].jpg`. Opciones de tamano: `'normal'`, `'grande'`, `'horizontal'`.
+Editar el array `lookbookItems` en `lib/defaults.js`. Cada item tiene `imagenUrl` apuntando a `/lookbook/[nombre-look].jpg`. Opciones de tamano: `'normal'`, `'grande'`, `'horizontal'`.
 
 ### 15.7 Cambiar promociones
 
-Editar el array `promos`:
+Editar el array `promos` en `lib/defaults.js`:
 
 ```javascript
 export const promos = [
@@ -1077,6 +1081,8 @@ export const promos = [
 ```
 
 ### 15.8 Cambiar la temporada
+
+En `lib/defaults.js`:
 
 ```javascript
 export const temporadaActual = {
@@ -1156,15 +1162,26 @@ Cada vez que se haga push a la rama `main`, Vercel automaticamente compilara y d
 
 ## 17. Variables y Configuracion Importante
 
-### Constantes criticas en `lib/config.js`
+### Constantes criticas
+
+La configuracion esta dividida en tres archivos:
+
+**`lib/config.js`** — Datos del negocio:
 
 | Variable | Valor por defecto | Descripcion |
 |---|---|---|
-| `SHEET_ID` | `'TU_GOOGLE_SHEET_ID_AQUI'` | ID de la Google Sheet para cargar datos remotos. Se debe reemplazar con el ID real o dejar el valor por defecto para usar datos locales. |
-| `adminConfig.password` | `'nortesport2026'` | Contrasena de acceso al panel administrativo. Cambiar antes de poner en produccion. |
 | `negocio.whatsapp` | `'5493854788733'` | Numero de WhatsApp con codigo de pais (sin +). Se usa para generar links de `wa.me`. |
 | `negocio.instagram` | `'@nortesport.sgo'` | Handle de Instagram mostrado en el sitio. |
 | `negocio.instagramUrl` | `'https://www.instagram.com/nortesport.sgo?utm_source=...'` | URL completa del perfil de Instagram (con parametros UTM). |
+
+**`lib/admin.js`** — Configuracion del admin:
+
+| Variable | Valor por defecto | Descripcion |
+|---|---|---|
+| `SHEET_ID` | `'1Wdm3OjlRfAVK6KjwZrWnj2xdhG2oDQlDW6ecRNDaZtM'` | ID de la Google Sheet para cargar datos remotos. |
+| `adminConfig.password` | `'nortesport2026'` | Contrasena de acceso al panel administrativo. Cambiar antes de poner en produccion. |
+
+**`lib/defaults.js`** — Datos de fallback (productos, testimonios, lookbook, FAQs, promos, temporada). Se usan cuando Google Sheets no responde.
 
 ### Claves de localStorage
 
@@ -1202,7 +1219,7 @@ El archivo `lib/sheets.js` permite cargar productos, testimonios, lookbook y con
 | `Lookbook` | ID, Titulo, Badge, Tamano, ImagenURL |
 | `Config` | Clave, Valor (pares clave-valor para temporada, promos, etc.) |
 
-Si la Google Sheet no esta disponible o el `SHEET_ID` no esta configurado, el sistema usa los datos locales de `lib/config.js` como fallback.
+Si la Google Sheet no esta disponible o el `SHEET_ID` no esta configurado, el sistema usa los datos locales de `lib/defaults.js` como fallback.
 
 ### Google Drive para imagenes
 
@@ -1217,7 +1234,7 @@ Esto permite usar imagenes almacenadas en Google Drive directamente en los produ
 
 ### Colores del PDF
 
-Definidos en `adminConfig.pdfColors`, controlan la apariencia de los catalogos generados:
+Definidos en `adminConfig.pdfColors` (`lib/admin.js`), controlan la apariencia de los catalogos generados:
 
 ```javascript
 pdfColors: {

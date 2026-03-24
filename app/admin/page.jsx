@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { ShieldCheck } from 'lucide-react'
 import LoginForm from '@/components/admin/LoginForm'
-import { adminConfig } from '@/lib/config'
+import { adminConfig } from '@/lib/admin'
 
 export default function AdminLoginPage() {
   const router = useRouter()

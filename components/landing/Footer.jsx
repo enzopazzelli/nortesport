@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Instagram, MessageCircle, Phone, MapPin, Clock, Settings } from 'lucide-react'
-import { negocio, navLinks, categorias } from '@/lib/config'
+import { negocio, navLinks } from '@/lib/config'
+import { categorias } from '@/lib/defaults'
 
 export default function Footer() {
   return (

@@ -13,6 +13,7 @@ const statusOptions = [
   { label: 'Nuevos', value: 'NUEVO' },
   { label: 'En oferta', value: 'SALE' },
   { label: 'Ultimas unidades', value: 'ÚLTIMAS' },
+  { label: 'Sin stock', value: 'SIN_STOCK' },
 ]
 
 export default function FilterSidebar({

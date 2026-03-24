@@ -108,9 +108,9 @@ export default function CarritoPanel({
                 <div key={`${item.id}-${item.talle}`} className="flex gap-3">
                   {/* Thumbnail */}
                   <div className="w-[60px] h-[60px] rounded-lg flex-shrink-0 overflow-hidden">
-                    {item.imagenUrl ? (
+                    {item.imagenes?.length > 0 ? (
                       <img
-                        src={item.imagenUrl}
+                        src={item.imagenes[0]}
                         alt={item.nombre}
                         className="w-full h-full object-cover"
                       />

@@ -42,6 +42,7 @@ export default function DashboardPage() {
   })
   const [categories, setCategories] = useState([])
   const [activeCategories, setActiveCategories] = useState([])
+  const [selectedRows, setSelectedRows] = useState(new Set())
 
   // Auth check
   useEffect(() => {
@@ -95,7 +96,7 @@ export default function DashboardPage() {
     setActiveCategories(uniqueCats)
   }, [fileData, config.columnMapping.categoria])
 
-  // Build products for PDF
+  // Build products for PDF (only selected rows)
   const getFilteredProducts = useCallback(() => {
     if (!fileData) return []
 
@@ -104,12 +105,16 @@ export default function DashboardPage() {
       ? headers.indexOf(config.columnMapping.categoria)
       : -1
 
-    return rows
-      .filter((row) => {
-        if (activeCategories.length === 0 || catIndex === -1) return true
-        const cat = String(row[catIndex] || '').trim()
-        return activeCategories.includes(cat)
-      })
+    // Get filtered rows first (same logic as getFilteredRows)
+    const filtered = rows.filter((row) => {
+      if (activeCategories.length === 0 || catIndex === -1) return true
+      const cat = String(row[catIndex] || '').trim()
+      return activeCategories.includes(cat)
+    })
+
+    // Then only include selected rows
+    return filtered
+      .filter((_, i) => selectedRows.has(i))
       .map((row) => {
         const obj = {}
         headers.forEach((h, i) => {
@@ -117,7 +122,7 @@ export default function DashboardPage() {
         })
         return obj
       })
-  }, [fileData, config.columnMapping.categoria, activeCategories])
+  }, [fileData, config.columnMapping.categoria, activeCategories, selectedRows])
 
   // Get filtered rows for preview
   const getFilteredRows = useCallback(() => {
@@ -226,8 +231,8 @@ export default function DashboardPage() {
                     <li><strong>Sub&iacute; tu archivo</strong> &mdash; Arrastr&aacute; o seleccion&aacute; un archivo Excel (.xlsx) o CSV con tus productos. El archivo debe tener una fila de encabezados y al menos una columna con precios.</li>
                     <li><strong>Configur&aacute; la lista</strong> &mdash; Eleg&iacute; qu&eacute; columna tiene los precios (se detecta autom&aacute;ticamente). Pod&eacute;s agregar un margen en % que se suma a los precios. Tambi&eacute;n pod&eacute;s mapear las columnas de Nombre y Categor&iacute;a.</li>
                     <li><strong>Filtr&aacute; por categor&iacute;a</strong> &mdash; Si mapeaste la columna de categor&iacute;a, pod&eacute;s elegir qu&eacute; categor&iacute;as incluir en el PDF.</li>
-                    <li><strong>Revis&aacute; la preview</strong> &mdash; Verific&aacute; que los datos y precios se vean correctos antes de generar.</li>
-                    <li><strong>Gener&aacute; el PDF</strong> &mdash; Click en &quot;Generar PDF&quot; y se descarga autom&aacute;ticamente con el nombre &quot;catalogo-norte-sport-[fecha].pdf&quot;.</li>
+                    <li><strong>Revis&aacute; la preview</strong> &mdash; Verific&aacute; que los datos y precios se vean correctos. Pod&eacute;s hacer click en cada fila para incluirla o excluirla del PDF (checkbox a la izquierda). Tambi&eacute;n pod&eacute;s seleccionar/deseleccionar todos desde el header.</li>
+                    <li><strong>Gener&aacute; el PDF</strong> &mdash; Click en &quot;Generar PDF&quot; y se descarga autom&aacute;ticamente. Solo se incluyen las filas seleccionadas.</li>
                   </ol>
                 </div>
               </div>
@@ -260,6 +265,7 @@ export default function DashboardPage() {
                   headers={fileData.headers}
                   rows={getFilteredRows()}
                   config={config}
+                  onSelectionChange={setSelectedRows}
                 />
 
                 {/* Step 5: Generate PDF */}

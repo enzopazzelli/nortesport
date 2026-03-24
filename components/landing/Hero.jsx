@@ -1,8 +1,9 @@
 'use client'
 
-import { temporadaActual, negocio, stats } from '@/lib/config'
+import { negocio, stats } from '@/lib/config'
+import { temporadaActual as defaultTemporada } from '@/lib/defaults'
 
-export default function Hero() {
+export default function Hero({ temporada = defaultTemporada }) {
   return (
     <section
       id="inicio"
@@ -35,7 +36,7 @@ export default function Hero() {
         <div className="max-w-[600px]">
           {/* Badge pill */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 border border-accent text-white text-sm backdrop-blur-sm mb-6">
-            <span>&#128293; Temporada {temporadaActual.nombre}</span>
+            <span>&#128293; Temporada {temporada.nombre}</span>
           </div>
 
           {/* Heading */}

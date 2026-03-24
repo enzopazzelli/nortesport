@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
-import { categorias, tallesDisponibles } from '@/lib/config'
+import { categorias, tallesDisponibles } from '@/lib/defaults'
 import FilterSidebar from '@/components/landing/FilterSidebar'
 import ProductCard from '@/components/landing/ProductCard'
 
@@ -53,10 +53,12 @@ export default function Productos({ productos = [], onQuickView, onAddToCart }) 
       }
     }
 
-    // Status (badge) filter
+    // Status filter
     if (filters.status !== null) {
-      if (product.badge !== filters.status) {
-        return false
+      if (filters.status === 'SIN_STOCK') {
+        if (product.stock == null || product.stock > 0) return false
+      } else {
+        if (product.badge !== filters.status) return false
       }
     }
 

@@ -13,7 +13,7 @@ import {
   GripVertical,
   Eye,
 } from 'lucide-react'
-import { lookbookItems as defaultItems } from '@/lib/config'
+import { lookbookItems as defaultItems } from '@/lib/defaults'
 
 const STORAGE_KEY = 'norte_lookbook_overrides'
 const ORDER_KEY = 'norte_lookbook_order'

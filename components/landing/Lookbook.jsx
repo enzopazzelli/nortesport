@@ -2,9 +2,9 @@
 
 import { useState, useCallback } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
-import { lookbookItems } from '@/lib/config'
+import { lookbookItems as defaultItems } from '@/lib/defaults'
 
-export default function Lookbook() {
+export default function Lookbook({ items = defaultItems }) {
   const [lightbox, setLightbox] = useState({ open: false, index: 0 })
 
   const openLightbox = (index) => setLightbox({ open: true, index })
@@ -13,11 +13,11 @@ export default function Lookbook() {
   const goTo = useCallback(
     (dir) => {
       setLightbox((prev) => {
-        const next = (prev.index + dir + lookbookItems.length) % lookbookItems.length
+        const next = (prev.index + dir + items.length) % items.length
         return { ...prev, index: next }
       })
     },
-    []
+    [items.length]
   )
 
   const sizeClasses = (tamano) => {
@@ -31,7 +31,7 @@ export default function Lookbook() {
     }
   }
 
-  const current = lookbookItems[lightbox.index]
+  const current = items[lightbox.index]
 
   return (
     <section id="lookbook" className="py-16 md:py-24 bg-[#F7F8FA]">
@@ -51,7 +51,7 @@ export default function Lookbook() {
 
         {/* Grid — masonry-style on desktop, 2-col symmetric on mobile */}
         <div className="grid grid-cols-2 md:grid-cols-4 md:auto-rows-[180px] gap-3 md:gap-4">
-          {lookbookItems.map((item, idx) => (
+          {items.map((item, idx) => (
             <div
               key={item.id}
               className={`relative rounded-xl overflow-hidden cursor-pointer group ${sizeClasses(item.tamano)}`}
@@ -127,7 +127,7 @@ export default function Lookbook() {
             <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-6">
               <h3 className="text-white text-2xl font-bold">{current.titulo}</h3>
               <p className="text-white/70 text-sm mt-1">
-                {lightbox.index + 1} / {lookbookItems.length}
+                {lightbox.index + 1} / {items.length}
               </p>
             </div>
 

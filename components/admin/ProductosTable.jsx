@@ -10,7 +10,7 @@ import {
   ToggleLeft,
   ToggleRight,
 } from 'lucide-react'
-import { productos as defaultProductos } from '@/lib/config'
+import { productos as defaultProductos } from '@/lib/defaults'
 
 const STORAGE_KEY = 'norte_productos_overrides'
 
@@ -31,7 +31,8 @@ export default function ProductosTable() {
   const [products, setProducts] = useState([])
   const [overrides, setOverrides] = useState({})
   const [editingId, setEditingId] = useState(null)
-  const [editPrice, setEditPrice] = useState('')
+  const [editField, setEditField] = useState(null) // 'precio' | 'stock'
+  const [editValue, setEditValue] = useState('')
 
   useEffect(() => {
     const stored = getStoredOverrides()
@@ -60,24 +61,26 @@ export default function ProductosTable() {
     updateOverride(id, { disponible: !current })
   }
 
-  const startEditPrice = (product) => {
+  const startEdit = (product, field) => {
     setEditingId(product.id)
-    setEditPrice(String(product.precio))
+    setEditField(field)
+    setEditValue(String(field === 'stock' ? (product.stock ?? '') : product.precio))
   }
 
-  const savePrice = (id) => {
-    const numPrice = Number(editPrice)
-    if (isNaN(numPrice) || numPrice < 0) {
-      setEditingId(null)
+  const saveEdit = (id) => {
+    const num = Number(editValue)
+    if (isNaN(num) || num < 0) {
+      cancelEdit()
       return
     }
-    updateOverride(id, { precio: numPrice })
-    setEditingId(null)
+    updateOverride(id, { [editField]: editField === 'stock' ? Math.floor(num) : num })
+    cancelEdit()
   }
 
-  const cancelEditPrice = () => {
+  const cancelEdit = () => {
     setEditingId(null)
-    setEditPrice('')
+    setEditField(null)
+    setEditValue('')
   }
 
   const handleRestore = () => {
@@ -135,6 +138,9 @@ export default function ProductosTable() {
                 <th className="text-left px-4 py-3 font-semibold text-secondary w-36">
                   Precio
                 </th>
+                <th className="text-left px-4 py-3 font-semibold text-secondary w-24">
+                  Stock
+                </th>
                 <th className="text-left px-4 py-3 font-semibold text-secondary w-28">
                   Badge
                 </th>
@@ -165,27 +171,27 @@ export default function ProductosTable() {
                       {product.categoria}
                     </td>
                     <td className="px-4 py-3">
-                      {isEditing ? (
+                      {isEditing && editField === 'precio' ? (
                         <div className="flex items-center gap-1">
                           <input
                             type="number"
-                            value={editPrice}
-                            onChange={(e) => setEditPrice(e.target.value)}
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter') savePrice(product.id)
-                              if (e.key === 'Escape') cancelEditPrice()
+                              if (e.key === 'Enter') saveEdit(product.id)
+                              if (e.key === 'Escape') cancelEdit()
                             }}
                             className="w-24 px-2 py-1 border border-accent rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
                             autoFocus
                           />
                           <button
-                            onClick={() => savePrice(product.id)}
+                            onClick={() => saveEdit(product.id)}
                             className="p-1 text-green-600 hover:bg-green-50 rounded"
                           >
                             <Check className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={cancelEditPrice}
+                            onClick={cancelEdit}
                             className="p-1 text-secondary hover:bg-bg-alt rounded"
                           >
                             <X className="w-4 h-4" />
@@ -193,11 +199,53 @@ export default function ProductosTable() {
                         </div>
                       ) : (
                         <button
-                          onClick={() => startEditPrice(product)}
+                          onClick={() => startEdit(product, 'precio')}
                           className="group/price flex items-center gap-1 text-dark font-semibold hover:text-accent"
                         >
                           {formatPrice(product.precio)}
                           <Pencil className="w-3 h-3 opacity-0 group-hover/price:opacity-100 text-accent" />
+                        </button>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {isEditing && editField === 'stock' ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') saveEdit(product.id)
+                              if (e.key === 'Escape') cancelEdit()
+                            }}
+                            className="w-16 px-2 py-1 border border-accent rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
+                            autoFocus
+                            min="0"
+                          />
+                          <button
+                            onClick={() => saveEdit(product.id)}
+                            className="p-1 text-green-600 hover:bg-green-50 rounded"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="p-1 text-secondary hover:bg-bg-alt rounded"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => startEdit(product, 'stock')}
+                          className={`group/stock flex items-center gap-1 font-medium hover:text-accent ${
+                            product.stock != null && product.stock <= 0
+                              ? 'text-sale'
+                              : 'text-dark'
+                          }`}
+                        >
+                          {product.stock ?? '—'}
+                          <Pencil className="w-3 h-3 opacity-0 group-hover/stock:opacity-100 text-accent" />
                         </button>
                       )}
                     </td>

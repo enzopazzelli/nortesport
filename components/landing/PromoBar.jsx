@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
-import { promos } from '@/lib/config'
+import { promos as defaultPromos } from '@/lib/defaults'
 
 const STORAGE_KEY = 'norte-promo-bar-closed'
 
-export default function PromoBar() {
+export default function PromoBar({ promos = defaultPromos }) {
   const [visible, setVisible] = useState(true)
 
   useEffect(() => {
