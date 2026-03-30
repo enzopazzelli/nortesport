@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Minus, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
+import ShareButton from '@/components/ui/ShareButton'
 
 export default function QuickViewModal({
   product,
@@ -249,6 +250,7 @@ export default function QuickViewModal({
                 >
                   Comprar ahora
                 </button>
+                <ShareButton product={product} variant="full" />
               </div>
             </>
           )}

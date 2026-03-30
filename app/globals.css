@@ -102,6 +102,9 @@ html {
 .animate-scale-in {
   animation: scaleIn 0.3s ease forwards;
 }
+.animate-in {
+  animation: scaleIn 0.2s ease forwards;
+}
 
 /* Chevron rotation */
 .chevron-rotate {
@@ -123,7 +126,8 @@ html {
 .slide-in-right,
 .slide-out-right,
 .animate-fade-in,
-.animate-scale-in {
+.animate-scale-in,
+.animate-in {
   transition: none;
 }
 

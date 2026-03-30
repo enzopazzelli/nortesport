@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Eye, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
+import ShareButton from '@/components/ui/ShareButton'
 
 export default function ProductCard({ product, onQuickView, onAddToCart }) {
   const [currentImg, setCurrentImg] = useState(0)
@@ -125,7 +126,7 @@ export default function ProductCard({ product, onQuickView, onAddToCart }) {
 
         {/* Hover overlay with action buttons */}
         {!outOfStock && (
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 z-[5]">
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center gap-3 flex-wrap opacity-0 group-hover:opacity-100 z-[5]">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -146,6 +147,7 @@ export default function ProductCard({ product, onQuickView, onAddToCart }) {
               <ShoppingCart size={16} />
               Agregar
             </button>
+            <ShareButton product={product} variant="icon" />
           </div>
         )}
       </div>
