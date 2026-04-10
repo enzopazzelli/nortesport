@@ -63,14 +63,8 @@ export default function CarritoPanel({
       updatedAt: new Date().toISOString(),
     })
 
-    // Open WhatsApp via anchor click to avoid popup blockers
-    const a = document.createElement('a')
-    a.href = waLink(message)
-    a.target = '_blank'
-    a.rel = 'noopener noreferrer'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+    // Navigate to WhatsApp
+    window.location.href = waLink(message)
   }
 
   const handleMercadoPago = () => {
