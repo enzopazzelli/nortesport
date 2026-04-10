@@ -45,28 +45,32 @@ export default function CarritoPanel({
 
     const message = `\ud83c\udfcb\ufe0f *Nuevo pedido \u2014 Norte Sport*\n\ud83c\udd94 Pedido: ${orderId}\n\n\ud83d\udc64 Nombre: ${nombre || 'No indicado'}\n\n\ud83d\udccb Productos:\n${productLines}\n\n\ud83d\udcb0 Total: ${formatPrice(total)}\n\n\ud83d\udcdd Notas: ${notas || 'Sin notas'}`
 
-    // Open WhatsApp first (must be immediate to avoid popup blocker)
-    const wa = window.open(waLink(message), '_blank')
+    // Save order
+    saveOrder({
+      id: orderId,
+      cliente: nombre || 'No indicado',
+      notas: notas || '',
+      items: items.map((item) => ({
+        id: item.id,
+        nombre: item.nombre,
+        precio: item.precio,
+        talle: item.talle,
+        cantidad: item.cantidad,
+      })),
+      total,
+      estado: 'pendiente',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
 
-    // Only save order if WhatsApp actually opened
-    if (wa) {
-      saveOrder({
-        id: orderId,
-        cliente: nombre || 'No indicado',
-        notas: notas || '',
-        items: items.map((item) => ({
-          id: item.id,
-          nombre: item.nombre,
-          precio: item.precio,
-          talle: item.talle,
-          cantidad: item.cantidad,
-        })),
-        total,
-        estado: 'pendiente',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })
-    }
+    // Open WhatsApp via anchor click to avoid popup blockers
+    const a = document.createElement('a')
+    a.href = waLink(message)
+    a.target = '_blank'
+    a.rel = 'noopener noreferrer'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
   }
 
   const handleMercadoPago = () => {
