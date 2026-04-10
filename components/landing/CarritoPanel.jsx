@@ -45,25 +45,28 @@ export default function CarritoPanel({
 
     const message = `\ud83c\udfcb\ufe0f *Nuevo pedido \u2014 Norte Sport*\n\ud83c\udd94 Pedido: ${orderId}\n\n\ud83d\udc64 Nombre: ${nombre || 'No indicado'}\n\n\ud83d\udccb Productos:\n${productLines}\n\n\ud83d\udcb0 Total: ${formatPrice(total)}\n\n\ud83d\udcdd Notas: ${notas || 'Sin notas'}`
 
-    // Save order for admin tracking
-    saveOrder({
-      id: orderId,
-      cliente: nombre || 'No indicado',
-      notas: notas || '',
-      items: items.map((item) => ({
-        id: item.id,
-        nombre: item.nombre,
-        precio: item.precio,
-        talle: item.talle,
-        cantidad: item.cantidad,
-      })),
-      total,
-      estado: 'pendiente',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    })
+    // Open WhatsApp first (must be immediate to avoid popup blocker)
+    const wa = window.open(waLink(message), '_blank')
 
-    window.open(waLink(message), '_blank')
+    // Only save order if WhatsApp actually opened
+    if (wa) {
+      saveOrder({
+        id: orderId,
+        cliente: nombre || 'No indicado',
+        notas: notas || '',
+        items: items.map((item) => ({
+          id: item.id,
+          nombre: item.nombre,
+          precio: item.precio,
+          talle: item.talle,
+          cantidad: item.cantidad,
+        })),
+        total,
+        estado: 'pendiente',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+    }
   }
 
   const handleMercadoPago = () => {
