@@ -17,6 +17,7 @@ import {
   productos as productosConfig,
   testimonios as testimoniosConfig,
   lookbookItems as lookbookConfig,
+  faqs as faqsConfig,
   temporadaActual,
   promos as promosConfig,
 } from '@/lib/defaults'
@@ -30,6 +31,7 @@ export default function Home() {
   const [productos, setProductos] = useState(productosConfig)
   const [testimonios, setTestimonios] = useState(testimoniosConfig)
   const [lookbook, setLookbook] = useState(lookbookConfig)
+  const [faqs, setFaqs] = useState(faqsConfig)
   const [siteConfig, setSiteConfig] = useState({ temporada: temporadaActual, promos: promosConfig })
 
   // Fetch data from Sheets via API route
@@ -40,6 +42,7 @@ export default function Home() {
         if (data.productos?.length) setProductos(data.productos)
         if (data.testimonios?.length) setTestimonios(data.testimonios)
         if (data.lookbook?.length) setLookbook(data.lookbook)
+        if (data.faqs?.length) setFaqs(data.faqs)
         if (data.config) setSiteConfig(data.config)
       })
       .catch(() => {
@@ -147,7 +150,7 @@ export default function Home() {
         </section>
 
         <section id="faq" className="scroll-reveal">
-          <FAQ />
+          <FAQ items={faqs} />
         </section>
 
         <section id="contacto" className="scroll-reveal">

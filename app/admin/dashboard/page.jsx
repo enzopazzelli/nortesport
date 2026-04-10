@@ -8,6 +8,7 @@ import {
   FileSpreadsheet,
   Image,
   Package,
+  ClipboardList,
   Info,
   Home,
 } from 'lucide-react'
@@ -18,9 +19,11 @@ import CategoryFilter from '@/components/admin/CategoryFilter'
 import PDFGenerator from '@/components/admin/PDFGenerator'
 import LookbookManager from '@/components/admin/LookbookManager'
 import ProductosTable from '@/components/admin/ProductosTable'
+import PedidosManager from '@/components/admin/PedidosManager'
 import { detectPriceColumns } from '@/lib/excel-parser'
 
 const TABS = [
+  { id: 'pedidos', label: 'Pedidos', icon: ClipboardList },
   { id: 'catalogos', label: 'Catálogos', icon: FileSpreadsheet },
   { id: 'lookbook', label: 'Lookbook', icon: Image },
   { id: 'productos', label: 'Productos', icon: Package },
@@ -29,7 +32,7 @@ const TABS = [
 export default function DashboardPage() {
   const router = useRouter()
   const [authenticated, setAuthenticated] = useState(false)
-  const [activeTab, setActiveTab] = useState('catalogos')
+  const [activeTab, setActiveTab] = useState('pedidos')
 
   // Catalog state
   const [fileData, setFileData] = useState(null) // { headers, rows, sheetName }
@@ -209,6 +212,37 @@ export default function DashboardPage() {
 
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        {/* Pedidos tab */}
+        {activeTab === 'pedidos' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-dark mb-1">
+                Gesti&oacute;n de pedidos
+              </h2>
+              <p className="text-secondary text-sm">
+                Administr&aacute; los pedidos que llegan desde la tienda. Confirm&aacute; o cancel&aacute; ventas para controlar el stock y ver m&eacute;tricas.
+              </p>
+            </div>
+
+            <div className="bg-accent/5 border border-accent/20 rounded-xl p-5">
+              <div className="flex items-start gap-3">
+                <Info className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+                <div className="text-sm text-secondary space-y-2">
+                  <p className="font-semibold text-dark">C&oacute;mo funciona:</p>
+                  <ol className="list-decimal list-inside space-y-1.5 ml-1">
+                    <li><strong>Pedido autom&aacute;tico</strong> &mdash; Cuando un cliente env&iacute;a un pedido por WhatsApp desde la tienda, se registra autom&aacute;ticamente ac&aacute; con estado &quot;Pendiente&quot;.</li>
+                    <li><strong>Confirmar venta</strong> &mdash; Si la venta se concret&oacute;, hac&eacute; click en &quot;Confirmar venta&quot;. Esto suma al stock vendido y a las m&eacute;tricas de ingresos.</li>
+                    <li><strong>Cancelar</strong> &mdash; Si no se concret&oacute;, cancel&aacute; el pedido. El stock no se modifica.</li>
+                    <li><strong>M&eacute;tricas</strong> &mdash; Arriba pod&eacute;s ver el resumen: total de pedidos, ingresos, tasa de conversi&oacute;n y productos m&aacute;s vendidos.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <PedidosManager />
+          </div>
+        )}
+
         {/* Catálogos tab */}
         {activeTab === 'catalogos' && (
           <div className="space-y-6">

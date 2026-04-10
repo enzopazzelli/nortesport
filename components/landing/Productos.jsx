@@ -93,6 +93,7 @@ export default function Productos({ productos = [], onQuickView, onAddToCart }) 
           <FilterSidebar
             categories={categorias}
             sizes={tallesDisponibles}
+            productos={productos}
             activeFilters={filters}
             onFilterChange={handleFilterChange}
             onClear={handleClear}

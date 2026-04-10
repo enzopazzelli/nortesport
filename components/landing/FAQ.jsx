@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { faqs } from '@/lib/defaults'
+import { faqs as faqsDefault } from '@/lib/defaults'
 
-export default function FAQ() {
+export default function FAQ({ items }) {
   const [openIndex, setOpenIndex] = useState(null)
+  const faqs = items?.length ? items : faqsDefault
 
   const toggle = (index) => {
     setOpenIndex((prev) => (prev === index ? null : index))

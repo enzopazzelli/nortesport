@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { X, Trash2, Plus, Minus, MessageCircle, ShoppingBag } from 'lucide-react'
 import { waLink } from '@/lib/config'
+import { generateOrderId, saveOrder } from '@/lib/orders'
 
 const formatPrice = (price) =>
   '$' + price.toLocaleString('es-AR', { minimumFractionDigits: 0 })
@@ -33,6 +34,8 @@ export default function CarritoPanel({
   const total = items.reduce((sum, item) => sum + item.precio * item.cantidad, 0)
 
   const handleWhatsAppCheckout = () => {
+    const orderId = generateOrderId()
+
     const productLines = items
       .map(
         (item) =>
@@ -40,7 +43,25 @@ export default function CarritoPanel({
       )
       .join('\n')
 
-    const message = `\ud83c\udfcb\ufe0f *Nuevo pedido \u2014 Norte Sport*\n\n\ud83d\udc64 Nombre: ${nombre || 'No indicado'}\n\n\ud83d\udccb Productos:\n${productLines}\n\n\ud83d\udcb0 Total: ${formatPrice(total)}\n\n\ud83d\udcdd Notas: ${notas || 'Sin notas'}`
+    const message = `\ud83c\udfcb\ufe0f *Nuevo pedido \u2014 Norte Sport*\n\ud83c\udd94 Pedido: ${orderId}\n\n\ud83d\udc64 Nombre: ${nombre || 'No indicado'}\n\n\ud83d\udccb Productos:\n${productLines}\n\n\ud83d\udcb0 Total: ${formatPrice(total)}\n\n\ud83d\udcdd Notas: ${notas || 'Sin notas'}`
+
+    // Save order for admin tracking
+    saveOrder({
+      id: orderId,
+      cliente: nombre || 'No indicado',
+      notas: notas || '',
+      items: items.map((item) => ({
+        id: item.id,
+        nombre: item.nombre,
+        precio: item.precio,
+        talle: item.talle,
+        cantidad: item.cantidad,
+      })),
+      total,
+      estado: 'pendiente',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
 
     window.open(waLink(message), '_blank')
   }

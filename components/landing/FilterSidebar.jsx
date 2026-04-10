@@ -1,12 +1,43 @@
 'use client'
 
+import { useMemo } from 'react'
 import { X } from 'lucide-react'
 
-const priceRanges = [
-  { label: 'Hasta $15.000', min: 0, max: 15000 },
-  { label: '$15.000-$25.000', min: 15000, max: 25000 },
-  { label: '$25.000+', min: 25000, max: Infinity },
-]
+function buildPriceRanges(productos) {
+  const prices = productos.map((p) => p.precio).filter((p) => p > 0).sort((a, b) => a - b)
+  if (prices.length === 0) return []
+
+  const min = prices[0]
+  const max = prices[prices.length - 1]
+  if (min === max) return [{ label: `$${min.toLocaleString('es-AR')}`, min, max }]
+
+  // Round to nearest nice step (500, 1000, 5000, etc.)
+  const range = max - min
+  const step = range <= 5000 ? 500 : range <= 20000 ? 1000 : range <= 100000 ? 5000 : 10000
+  const roundUp = (v) => Math.ceil(v / step) * step
+  const roundDown = (v) => Math.floor(v / step) * step
+
+  const low = roundDown(min)
+  const mid = roundUp(low + range / 3)
+  const high = roundUp(low + (range * 2) / 3)
+  const top = roundUp(max)
+
+  const fmt = (n) => '$' + n.toLocaleString('es-AR')
+
+  // Ensure distinct breakpoints
+  if (mid >= high || mid >= top) {
+    return [
+      { label: `Hasta ${fmt(roundUp((min + max) / 2))}`, min: 0, max: roundUp((min + max) / 2) },
+      { label: `${fmt(roundUp((min + max) / 2))}+`, min: roundUp((min + max) / 2), max: Infinity },
+    ]
+  }
+
+  return [
+    { label: `Hasta ${fmt(mid)}`, min: 0, max: mid },
+    { label: `${fmt(mid)} — ${fmt(high)}`, min: mid, max: high },
+    { label: `${fmt(high)}+`, min: high, max: Infinity },
+  ]
+}
 
 const statusOptions = [
   { label: 'Todos', value: null },
@@ -19,12 +50,14 @@ const statusOptions = [
 export default function FilterSidebar({
   categories = [],
   sizes = [],
+  productos = [],
   activeFilters = {},
   onFilterChange,
   onClear,
   isOpen = false,
   onClose,
 }) {
+  const priceRanges = useMemo(() => buildPriceRanges(productos), [productos])
   const selectedCategories = activeFilters.categories || []
   const selectedSizes = activeFilters.sizes || []
   const selectedPrice = activeFilters.price || null
