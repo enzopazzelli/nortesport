@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Minus, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import ShareButton from '@/components/ui/ShareButton'
+import FormattedDescription from '@/components/ui/FormattedDescription'
 
 export default function QuickViewModal({
   product,
@@ -158,9 +159,10 @@ export default function QuickViewModal({
           </div>
 
           {/* Description */}
-          <p className="text-secondary text-sm leading-relaxed mb-6">
-            {product.descripcion}
-          </p>
+          <FormattedDescription
+            text={product.descripcion}
+            className="text-secondary text-sm mb-6"
+          />
 
           {outOfStock ? (
             <div className="flex flex-col gap-3 mt-auto">

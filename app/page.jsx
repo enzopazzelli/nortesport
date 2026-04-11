@@ -79,7 +79,8 @@ export default function Home() {
           id: product.id,
           nombre: product.nombre,
           precio: product.precio,
-          talle,
+          talle: talle || null,
+          tallesDisponibles: product.talles || [],
           cantidad,
           imagenes: product.imagenes || [],
           placeholder: product.placeholder,
@@ -96,6 +97,28 @@ export default function Home() {
         item.id === id && item.talle === talle ? { ...item, cantidad: newCantidad } : item
       )
     )
+  }, [])
+
+  const updateTalle = useCallback((id, oldTalle, newTalle) => {
+    setCarrito((prev) => {
+      // Check if there's already an item with the new talle → merge quantities
+      const collision = prev.find((item) => item.id === id && item.talle === newTalle)
+      if (collision) {
+        return prev
+          .map((item) => {
+            if (item.id === id && item.talle === newTalle) {
+              const currentItem = prev.find((i) => i.id === id && i.talle === oldTalle)
+              return { ...item, cantidad: item.cantidad + (currentItem?.cantidad || 0) }
+            }
+            return item
+          })
+          .filter((item) => !(item.id === id && item.talle === oldTalle))
+      }
+      // Otherwise just update the talle
+      return prev.map((item) =>
+        item.id === id && item.talle === oldTalle ? { ...item, talle: newTalle } : item
+      )
+    })
   }, [])
 
   const removeFromCart = useCallback((id, talle) => {
@@ -165,6 +188,7 @@ export default function Home() {
         onClose={() => setCarritoOpen(false)}
         items={carrito}
         onUpdateQuantity={updateQuantity}
+        onUpdateTalle={updateTalle}
         onRemove={removeFromCart}
       />
 

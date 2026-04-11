@@ -140,7 +140,14 @@ export default function ProductCard({ product, onQuickView, onAddToCart }) {
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                onAddToCart?.(product)
+                const talles = product.talles || []
+                if (talles.length > 1) {
+                  // Force talle selection via QuickView modal
+                  onQuickView?.(product)
+                } else {
+                  // No talles or single talle → add directly
+                  onAddToCart?.(product, talles[0] || null)
+                }
               }}
               className="flex items-center gap-1.5 px-4 py-2 bg-white text-primary text-sm font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
             >

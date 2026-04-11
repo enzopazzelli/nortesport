@@ -13,11 +13,12 @@ export default function CarritoPanel({
   onClose,
   items = [],
   onUpdateQuantity,
+  onUpdateTalle,
   onRemove,
-  onCheckout,
 }) {
   const [nombre, setNombre] = useState('')
   const [notas, setNotas] = useState('')
+  const [editingTalle, setEditingTalle] = useState(null)
 
   // Lock body scroll when panel is open
   useEffect(() => {
@@ -126,76 +127,117 @@ export default function CarritoPanel({
           ) : (
             <div className="p-4 space-y-4">
               {/* Items */}
-              {items.map((item) => (
-                <div key={`${item.id}-${item.talle}`} className="flex gap-3">
-                  {/* Thumbnail */}
-                  <div className="w-[60px] h-[60px] rounded-lg flex-shrink-0 overflow-hidden">
-                    {item.imagenes?.length > 0 ? (
-                      <img
-                        src={item.imagenes[0]}
-                        alt={item.nombre}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div
-                        className="w-full h-full"
-                        style={{
-                          background: item.placeholder || 'linear-gradient(135deg, #2B3A52, #6B7B8D)',
-                        }}
-                      />
-                    )}
-                  </div>
+              {items.map((item) => {
+                const itemKey = `${item.id}-${item.talle}`
+                const isEditing = editingTalle === itemKey
+                const availableTalles = item.tallesDisponibles || []
+                return (
+                  <div key={itemKey} className="flex gap-3">
+                    {/* Thumbnail */}
+                    <div className="w-[60px] h-[60px] rounded-lg flex-shrink-0 overflow-hidden">
+                      {item.imagenes?.length > 0 ? (
+                        <img
+                          src={item.imagenes[0]}
+                          alt={item.nombre}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full"
+                          style={{
+                            background: item.placeholder || 'linear-gradient(135deg, #2B3A52, #6B7B8D)',
+                          }}
+                        />
+                      )}
+                    </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="font-medium text-dark text-sm truncate">{item.nombre}</p>
-                        {item.talle && (
-                          <p className="text-secondary text-xs">Talle {item.talle}</p>
-                        )}
-                        <p className="text-secondary text-xs mt-0.5">
-                          {formatPrice(item.precio)} c/u
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-dark text-sm truncate">{item.nombre}</p>
+
+                          {/* Talle selector */}
+                          {availableTalles.length > 0 && (
+                            <div className="mt-1">
+                              {isEditing ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {availableTalles.map((t) => {
+                                    const active = t === item.talle
+                                    return (
+                                      <button
+                                        key={t}
+                                        onClick={() => {
+                                          if (t !== item.talle) {
+                                            onUpdateTalle?.(item.id, item.talle, t)
+                                          }
+                                          setEditingTalle(null)
+                                        }}
+                                        className={`px-2 py-0.5 text-[11px] rounded border transition-colors ${
+                                          active
+                                            ? 'border-accent bg-accent/10 text-accent font-medium'
+                                            : 'border-gray-200 text-secondary hover:border-accent hover:text-accent'
+                                        }`}
+                                      >
+                                        {t}
+                                      </button>
+                                    )
+                                  })}
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setEditingTalle(itemKey)}
+                                  className="text-secondary hover:text-accent text-xs underline-offset-2 hover:underline transition-colors"
+                                >
+                                  {item.talle ? `Talle ${item.talle}` : 'Elegir talle'}
+                                </button>
+                              )}
+                            </div>
+                          )}
+
+                          <p className="text-secondary text-xs mt-0.5">
+                            {formatPrice(item.precio)} c/u
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => onRemove(item.id, item.talle)}
+                          className="text-secondary hover:text-sale p-1 flex-shrink-0 transition-colors"
+                          aria-label="Eliminar"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-2">
+                        {/* Quantity controls */}
+                        <div className="flex items-center border border-border rounded-lg">
+                          <button
+                            onClick={() => onUpdateQuantity(item.id, item.talle, item.cantidad - 1)}
+                            className="p-1.5 hover:bg-gray-100 transition-colors rounded-l-lg"
+                            aria-label="Reducir cantidad"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="px-3 text-sm font-medium min-w-[32px] text-center">
+                            {item.cantidad}
+                          </span>
+                          <button
+                            onClick={() => onUpdateQuantity(item.id, item.talle, item.cantidad + 1)}
+                            className="p-1.5 hover:bg-gray-100 transition-colors rounded-r-lg"
+                            aria-label="Aumentar cantidad"
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+
+                        {/* Subtotal */}
+                        <p className="font-semibold text-dark text-sm">
+                          {formatPrice(item.precio * item.cantidad)}
                         </p>
                       </div>
-                      <button
-                        onClick={() => onRemove(item.id, item.talle)}
-                        className="text-secondary hover:text-sale p-1 flex-shrink-0 transition-colors"
-                        aria-label="Eliminar"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-2">
-                      {/* Quantity controls */}
-                      <div className="flex items-center border border-border rounded-lg">
-                        <button
-                          onClick={() => onUpdateQuantity(item.id, item.talle, item.cantidad - 1)}
-                          className="p-1.5 hover:bg-gray-100 transition-colors rounded-l-lg"
-                          aria-label="Reducir cantidad"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="px-3 text-sm font-medium min-w-[32px] text-center">
-                          {item.cantidad}
-                        </span>
-                        <button
-                          onClick={() => onUpdateQuantity(item.id, item.talle, item.cantidad + 1)}
-                          className="p-1.5 hover:bg-gray-100 transition-colors rounded-r-lg"
-                          aria-label="Aumentar cantidad"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-
-                      {/* Subtotal */}
-                      <p className="font-semibold text-dark text-sm">
-                        {formatPrice(item.precio * item.cantidad)}
-                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
 
               {/* Divider */}
               <hr className="border-border" />
