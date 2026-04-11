@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { X, Trash2, Plus, Minus, MessageCircle, ShoppingBag } from 'lucide-react'
 import { waLink } from '@/lib/config'
 import { generateOrderId, saveOrder } from '@/lib/orders'
+import SizeGuideLink from '@/components/ui/SizeGuideLink'
 
 const formatPrice = (price) =>
   '$' + price.toLocaleString('es-AR', { minimumFractionDigits: 0 })
@@ -126,6 +127,11 @@ export default function CarritoPanel({
             </div>
           ) : (
             <div className="p-4 space-y-4">
+              {/* Size guide link */}
+              <div className="flex justify-end">
+                <SizeGuideLink className="text-xs" />
+              </div>
+
               {/* Items */}
               {items.map((item) => {
                 const itemKey = `${item.id}-${item.talle}`

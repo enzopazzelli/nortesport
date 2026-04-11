@@ -5,6 +5,7 @@ import { Minus, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import ShareButton from '@/components/ui/ShareButton'
 import FormattedDescription from '@/components/ui/FormattedDescription'
+import SizeGuideLink from '@/components/ui/SizeGuideLink'
 
 export default function QuickViewModal({
   product,
@@ -183,7 +184,10 @@ export default function QuickViewModal({
             <>
               {/* Size selector */}
               <div className="mb-6">
-                <h4 className="font-semibold text-sm text-primary mb-2">Talle</h4>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold text-sm text-primary">Talle</h4>
+                  <SizeGuideLink className="text-xs" />
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {(product.talles || []).map((talle) => {
                     const active = selectedSize === talle
