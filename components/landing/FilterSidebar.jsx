@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo } from 'react'
-import { X } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { ChevronDown, SlidersHorizontal } from 'lucide-react'
 
 function buildPriceRanges(productos) {
   const prices = productos.map((p) => p.precio).filter((p) => p > 0).sort((a, b) => a - b)
@@ -54,9 +54,8 @@ export default function FilterSidebar({
   activeFilters = {},
   onFilterChange,
   onClear,
-  isOpen = false,
-  onClose,
 }) {
+  const [mobileExpanded, setMobileExpanded] = useState(false)
   const priceRanges = useMemo(() => buildPriceRanges(productos), [productos])
   const selectedCategories = activeFilters.categories || []
   const selectedSizes = activeFilters.sizes || []
@@ -210,6 +209,12 @@ export default function FilterSidebar({
     </div>
   )
 
+  const activeCount =
+    selectedCategories.length +
+    selectedSizes.length +
+    (selectedPrice ? 1 : 0) +
+    (selectedStatus ? 1 : 0)
+
   return (
     <>
       {/* Desktop sidebar */}
@@ -217,28 +222,32 @@ export default function FilterSidebar({
         {filterContent}
       </aside>
 
-      {/* Mobile drawer from bottom */}
-      {isOpen && (
-        <div className="fixed inset-0 z-[60] md:hidden">
-          <div
-            className="absolute inset-0 bg-black/40 animate-fade-in"
-            onClick={onClose}
+      {/* Mobile inline filters */}
+      <div className="md:hidden w-full">
+        <button
+          onClick={() => setMobileExpanded((v) => !v)}
+          className="flex items-center justify-between w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200"
+        >
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal size={18} className="text-primary" />
+            <span className="font-semibold text-sm text-primary">Filtros</span>
+            {activeCount > 0 && (
+              <span className="w-5 h-5 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                {activeCount}
+              </span>
+            )}
+          </div>
+          <ChevronDown
+            size={18}
+            className={`text-secondary transition-transform duration-200 ${mobileExpanded ? 'rotate-180' : ''}`}
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[80vh] overflow-y-auto p-6 slide-in-right">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-semibold text-lg text-primary">Filtros</h3>
-              <button
-                onClick={onClose}
-                className="p-1 rounded-full hover:bg-gray-100 text-gray-500"
-                aria-label="Cerrar filtros"
-              >
-                <X size={20} />
-              </button>
-            </div>
+        </button>
+        {mobileExpanded && (
+          <div className="mt-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
             {filterContent}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   )
 }

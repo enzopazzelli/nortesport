@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { SlidersHorizontal } from 'lucide-react'
 import FilterSidebar from '@/components/landing/FilterSidebar'
 import ProductCard from '@/components/landing/ProductCard'
 
@@ -30,7 +29,6 @@ export default function Productos({ productos = [], onQuickView, onAddToCart }) 
     price: null,
     status: null,
   })
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
 
   // Derive categories and sizes from actual products so they work with any value (letters, numbers, etc.)
   const categorias = useMemo(() => {
@@ -123,9 +121,8 @@ export default function Productos({ productos = [], onQuickView, onAddToCart }) 
           </p>
         </div>
 
-        {/* Layout: sidebar + grid */}
-        <div className="flex gap-10">
-          {/* Filter sidebar (desktop) */}
+        {/* Layout: filters above on mobile, sidebar on desktop */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-10">
           <FilterSidebar
             categories={categorias}
             sizes={tallesDisponibles}
@@ -133,8 +130,6 @@ export default function Productos({ productos = [], onQuickView, onAddToCart }) 
             activeFilters={filters}
             onFilterChange={handleFilterChange}
             onClear={handleClear}
-            isOpen={mobileFilterOpen}
-            onClose={() => setMobileFilterOpen(false)}
           />
 
           {/* Product grid */}
@@ -179,24 +174,6 @@ export default function Productos({ productos = [], onQuickView, onAddToCart }) 
         </div>
       </div>
 
-      {/* Mobile filter button - sticky at bottom */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 md:hidden">
-        <button
-          onClick={() => setMobileFilterOpen(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-full shadow-lg hover:bg-primary-dark transition-colors"
-        >
-          <SlidersHorizontal size={18} />
-          Filtros
-          {hasActiveFilters && (
-            <span className="w-5 h-5 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-              {filters.categories.length +
-                filters.sizes.length +
-                (filters.price ? 1 : 0) +
-                (filters.status ? 1 : 0)}
-            </span>
-          )}
-        </button>
-      </div>
     </section>
   )
 }
