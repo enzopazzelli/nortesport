@@ -29,11 +29,14 @@ export default function AboutUs() {
     <section id="nosotras" className="py-16 md:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
-          {/* Left — image placeholder */}
-          <div
-            className="rounded-xl aspect-square w-full max-w-lg mx-auto md:mx-0"
-            style={{ background: 'linear-gradient(135deg, #1A2535, #2B3A52)' }}
-          />
+          {/* Left — image */}
+          <div className="rounded-xl aspect-square w-full max-w-lg mx-auto md:mx-0 overflow-hidden">
+            <img
+              src="/logo.png"
+              alt="Norte Sport"
+              className="w-full h-full object-contain"
+            />
+          </div>
 
           {/* Right — content */}
           <div>

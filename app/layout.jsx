@@ -23,6 +23,9 @@ export const metadata = {
     locale: 'es_AR',
     siteName: 'Norte Sport',
   },
+  icons: {
+    icon: '/favicon.png',
+  },
   robots: {
     index: true,
     follow: true,
