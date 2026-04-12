@@ -42,7 +42,9 @@ const NETWORKS = [
 export default function ShareButton({ product, variant = 'icon' }) {
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
   const menuRef = useRef(null)
+  const btnRef = useRef(null)
 
   useEffect(() => {
     if (!open) return
@@ -157,10 +159,24 @@ export default function ShareButton({ product, variant = 'icon' }) {
   }
 
   // variant === 'icon' — compact button for ProductCard
+  const handleIconToggle = (e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({
+        top: Math.max(8, rect.top - 8),
+        left: Math.max(8, rect.left + rect.width / 2 - 120),
+      })
+    }
+    setOpen((v) => !v)
+  }
+
   return (
     <>
       <button
-        onClick={handleToggle}
+        ref={btnRef}
+        onClick={handleIconToggle}
         className="flex items-center gap-1.5 px-4 py-2 bg-white text-primary text-sm font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
         title="Compartir"
       >
@@ -170,11 +186,14 @@ export default function ShareButton({ product, variant = 'icon' }) {
 
       {open && (
         <div className="fixed inset-0 z-[70]" ref={menuRef}>
-          <div className="absolute inset-0" onClick={handleToggle} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl border border-gray-100 p-4 min-w-[240px] animate-in">
+          <div className="absolute inset-0" onClick={handleIconToggle} />
+          <div
+            className="fixed bg-white rounded-xl shadow-xl border border-gray-100 p-4 min-w-[240px] animate-in"
+            style={{ top: pos.top, left: pos.left, transform: 'translateY(-100%)' }}
+          >
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-semibold text-primary">Compartir</span>
-              <button onClick={handleToggle} className="text-secondary hover:text-primary">
+              <button onClick={handleIconToggle} className="text-secondary hover:text-primary">
                 <X size={16} />
               </button>
             </div>
