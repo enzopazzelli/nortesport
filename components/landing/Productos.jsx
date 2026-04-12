@@ -22,7 +22,7 @@ function sortTalles(a, b) {
   return String(a).localeCompare(String(b))
 }
 
-export default function Productos({ productos = [], onQuickView, onAddToCart }) {
+export default function Productos({ productos = [], searchTerm = '', onQuickView, onAddToCart }) {
   const [filters, setFilters] = useState({
     categories: [],
     sizes: [],
@@ -64,6 +64,14 @@ export default function Productos({ productos = [], onQuickView, onAddToCart }) 
 
   // Filter logic
   const filteredProducts = productos.filter((product) => {
+    // Search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      const name = (product.nombre || '').toLowerCase()
+      const cat = (product.categoria || '').toLowerCase()
+      if (!name.includes(term) && !cat.includes(term)) return false
+    }
+
     // Category filter
     if (
       filters.categories.length > 0 &&
@@ -100,6 +108,7 @@ export default function Productos({ productos = [], onQuickView, onAddToCart }) 
   })
 
   const hasActiveFilters =
+    searchTerm.length > 0 ||
     filters.categories.length > 0 ||
     filters.sizes.length > 0 ||
     filters.price !== null ||

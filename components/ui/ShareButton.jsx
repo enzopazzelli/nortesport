@@ -158,7 +158,7 @@ export default function ShareButton({ product, variant = 'icon' }) {
 
   // variant === 'icon' — compact button for ProductCard
   return (
-    <div className="relative" ref={menuRef}>
+    <>
       <button
         onClick={handleToggle}
         className="flex items-center gap-1.5 px-4 py-2 bg-white text-primary text-sm font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
@@ -169,34 +169,37 @@ export default function ShareButton({ product, variant = 'icon' }) {
       </button>
 
       {open && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 p-3 z-50 min-w-[200px] animate-in">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-primary uppercase tracking-wide">Compartir</span>
-            <button onClick={handleToggle} className="text-secondary hover:text-primary">
-              <X size={14} />
-            </button>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            {NETWORKS.map((net) => (
-              <button
-                key={net.name}
-                onClick={(e) => handleShare(e, net)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-white text-xs font-medium transition-colors ${net.color}`}
-              >
-                {net.icon}
-                {net.name}
+        <div className="fixed inset-0 z-[70]" ref={menuRef}>
+          <div className="absolute inset-0" onClick={handleToggle} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl border border-gray-100 p-4 min-w-[240px] animate-in">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold text-primary">Compartir</span>
+              <button onClick={handleToggle} className="text-secondary hover:text-primary">
+                <X size={16} />
               </button>
-            ))}
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-secondary hover:text-primary hover:border-gray-300 transition-colors text-xs font-medium"
-            >
-              {copied ? <Check size={14} className="text-green-500" /> : <Link size={14} />}
-              {copied ? 'Copiado!' : 'Copiar enlace'}
-            </button>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              {NETWORKS.map((net) => (
+                <button
+                  key={net.name}
+                  onClick={(e) => handleShare(e, net)}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-white text-sm font-medium transition-colors ${net.color}`}
+                >
+                  {net.icon}
+                  {net.name}
+                </button>
+              ))}
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 text-secondary hover:text-primary hover:border-gray-300 transition-colors text-sm font-medium"
+              >
+                {copied ? <Check size={14} className="text-green-500" /> : <Link size={14} />}
+                {copied ? 'Copiado!' : 'Copiar enlace'}
+              </button>
+            </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

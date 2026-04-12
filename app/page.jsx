@@ -26,6 +26,7 @@ export default function Home() {
   const [carrito, setCarrito] = useState([])
   const [carritoOpen, setCarritoOpen] = useState(false)
   const [quickViewProduct, setQuickViewProduct] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Data from Sheets (or fallback to config)
   const [productos, setProductos] = useState(productosConfig)
@@ -147,7 +148,7 @@ export default function Home() {
   return (
     <>
       <PromoBar promos={siteConfig.promos} />
-      <Navbar cartCount={cartCount} onCartToggle={() => setCarritoOpen(true)} />
+      <Navbar cartCount={cartCount} onCartToggle={() => setCarritoOpen(true)} onSearch={setSearchTerm} />
 
       <main id="inicio">
         <Hero temporada={siteConfig.temporada} />
@@ -155,6 +156,7 @@ export default function Home() {
         <section id="productos" className="scroll-reveal">
           <Productos
             productos={productos}
+            searchTerm={searchTerm}
             onQuickView={(product) => setQuickViewProduct(product)}
             onAddToCart={addToCart}
           />

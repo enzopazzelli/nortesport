@@ -45,7 +45,10 @@ export default function ProductCard({ product, onQuickView, onAddToCart }) {
   return (
     <div className={`group cursor-pointer ${outOfStock ? 'opacity-70' : ''}`}>
       {/* Image carousel */}
-      <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-3">
+      <div
+        className="relative aspect-[3/4] rounded-xl overflow-hidden mb-3"
+        onClick={() => onQuickView?.(product)}
+      >
         {images.length > 0 ? (
           <div className={`absolute inset-0 ${outOfStock ? 'grayscale-[40%]' : ''}`}>
             {images.map((src, i) => (
