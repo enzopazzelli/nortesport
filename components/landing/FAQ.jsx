@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { faqs as faqsDefault } from '@/lib/defaults'
+import FormattedDescription from '@/components/ui/FormattedDescription'
 
 export default function FAQ({ items }) {
   const [openIndex, setOpenIndex] = useState(null)
@@ -51,9 +52,10 @@ export default function FAQ({ items }) {
                     opacity: isOpen ? 1 : 0,
                   }}
                 >
-                  <p className="text-secondary pb-4 leading-relaxed">
-                    {faq.respuesta}
-                  </p>
+                  <FormattedDescription
+                    text={faq.respuesta}
+                    className="text-secondary pb-4 leading-relaxed"
+                  />
                 </div>
               </div>
             )
