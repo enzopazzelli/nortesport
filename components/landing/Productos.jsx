@@ -1,10 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
-import { categorias, tallesDisponibles } from '@/lib/defaults'
 import FilterSidebar from '@/components/landing/FilterSidebar'
 import ProductCard from '@/components/landing/ProductCard'
+
+// Natural sort: numeric values first (ascending), then common letter-size order, then alphabetical
+const LETTER_ORDER = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']
+function sortTalles(a, b) {
+  const na = Number(a)
+  const nb = Number(b)
+  const aIsNum = !Number.isNaN(na)
+  const bIsNum = !Number.isNaN(nb)
+  if (aIsNum && bIsNum) return na - nb
+  if (aIsNum) return -1
+  if (bIsNum) return 1
+  const ia = LETTER_ORDER.indexOf(String(a).toUpperCase())
+  const ib = LETTER_ORDER.indexOf(String(b).toUpperCase())
+  if (ia !== -1 && ib !== -1) return ia - ib
+  if (ia !== -1) return -1
+  if (ib !== -1) return 1
+  return String(a).localeCompare(String(b))
+}
 
 export default function Productos({ productos = [], onQuickView, onAddToCart }) {
   const [filters, setFilters] = useState({
@@ -14,6 +31,25 @@ export default function Productos({ productos = [], onQuickView, onAddToCart }) 
     status: null,
   })
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+
+  // Derive categories and sizes from actual products so they work with any value (letters, numbers, etc.)
+  const categorias = useMemo(() => {
+    const set = new Set()
+    productos.forEach((p) => {
+      if (p.categoria) set.add(String(p.categoria))
+    })
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [productos])
+
+  const tallesDisponibles = useMemo(() => {
+    const set = new Set()
+    productos.forEach((p) => {
+      (p.talles || []).forEach((t) => {
+        if (t != null && t !== '') set.add(String(t))
+      })
+    })
+    return Array.from(set).sort(sortTalles)
+  }, [productos])
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters)

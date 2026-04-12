@@ -69,10 +69,6 @@ export default function CarritoPanel({
     window.location.href = waLink(message)
   }
 
-  const handleMercadoPago = () => {
-    alert('Integraci\u00f3n con MercadoPago pr\u00f3ximamente. Por ahora, us\u00e1 WhatsApp.')
-  }
-
   const scrollToProducts = () => {
     onClose()
     setTimeout(() => {
@@ -281,14 +277,8 @@ export default function CarritoPanel({
                 <span className="font-bold text-xl text-dark">{formatPrice(total)}</span>
               </div>
 
-              {/* Checkout buttons */}
-              <div className="space-y-3 pt-2">
-                <button
-                  onClick={handleMercadoPago}
-                  className="w-full bg-accent text-white font-semibold py-3 rounded-lg hover:bg-accent/90 transition-colors"
-                >
-                  Pagar con MercadoPago
-                </button>
+              {/* Checkout button */}
+              <div className="pt-2">
                 <button
                   onClick={handleWhatsAppCheckout}
                   className="w-full bg-whatsapp text-white font-semibold py-3 rounded-lg hover:bg-whatsapp/90 transition-colors flex items-center justify-center gap-2"
