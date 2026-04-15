@@ -14,6 +14,7 @@ import {
   Eye,
 } from 'lucide-react'
 import { lookbookItems as defaultItems } from '@/lib/defaults'
+import { syncLookbookAdd, syncLookbookReorder, syncLookbookUpdate } from '@/lib/sync'
 
 const STORAGE_KEY = 'norte_lookbook_overrides'
 const ORDER_KEY = 'norte_lookbook_order'
@@ -115,7 +116,9 @@ export default function LookbookManager() {
     const newItems = [...items]
     ;[newItems[index], newItems[newIndex]] = [newItems[newIndex], newItems[index]]
     setItems(newItems)
-    saveOrder(newItems.map((i) => i.id))
+    const order = newItems.map((i) => i.id)
+    saveOrder(order)
+    syncLookbookReorder(order)
   }
 
   const startEdit = (item) => {
@@ -137,6 +140,7 @@ export default function LookbookManager() {
     )
     persistItems(newItems, newOverrides)
     setEditingId(null)
+    syncLookbookUpdate(id, editForm)
   }
 
   const cancelEdit = () => {
@@ -144,12 +148,13 @@ export default function LookbookManager() {
     setEditForm({})
   }
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!addForm.titulo.trim()) return
 
     const maxId = items.reduce((max, i) => Math.max(max, i.id), 0)
+    const tempId = maxId + 1
     const newItem = {
-      id: maxId + 1,
+      id: tempId,
       titulo: addForm.titulo.trim(),
       badge: addForm.badge.trim() || null,
       tamano: addForm.tamano,
@@ -159,11 +164,23 @@ export default function LookbookManager() {
       imageUrl: addForm.url.trim() || null,
     }
 
-    const newOverrides = { ...overrides, [newItem.id]: newItem }
+    const newOverrides = { ...overrides, [tempId]: newItem }
     const newItems = [...items, newItem]
     persistItems(newItems, newOverrides)
     setAddForm({ url: '', titulo: '', badge: '', tamano: 'normal' })
     setShowAddForm(false)
+
+    const result = await syncLookbookAdd(newItem)
+    if (result?.ok && result.id != null && result.id !== tempId) {
+      const realId = result.id
+      const remappedOverrides = { ...newOverrides }
+      delete remappedOverrides[tempId]
+      remappedOverrides[realId] = { ...newItem, id: realId }
+      const remappedItems = newItems.map((i) =>
+        i.id === tempId ? { ...i, id: realId } : i
+      )
+      persistItems(remappedItems, remappedOverrides)
+    }
   }
 
   const handleRestore = () => {

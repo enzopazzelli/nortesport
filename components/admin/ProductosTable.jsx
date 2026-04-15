@@ -11,6 +11,7 @@ import {
   ToggleRight,
 } from 'lucide-react'
 import { productos as defaultProductos } from '@/lib/defaults'
+import { syncProductUpdate } from '@/lib/sync'
 
 const STORAGE_KEY = 'norte_productos_overrides'
 
@@ -76,6 +77,8 @@ export default function ProductosTable() {
     setProducts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, ...changes } : p))
     )
+
+    syncProductUpdate(id, changes)
   }
 
   const toggleDisponible = (id, current) => {

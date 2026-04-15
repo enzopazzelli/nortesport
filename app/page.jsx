@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import PromoBar from '@/components/landing/PromoBar'
 import Navbar from '@/components/landing/Navbar'
 import Hero from '@/components/landing/Hero'
@@ -21,6 +21,13 @@ import {
   temporadaActual,
   promos as promosConfig,
 } from '@/lib/defaults'
+import {
+  applyProductOverrides,
+  applyLookbookOverrides,
+  PRODUCTOS_OVERRIDES_KEY,
+  LOOKBOOK_OVERRIDES_KEY,
+  LOOKBOOK_ORDER_KEY,
+} from '@/lib/overrides'
 
 export default function Home() {
   const [carrito, setCarrito] = useState([])
@@ -28,27 +35,55 @@ export default function Home() {
   const [quickViewProduct, setQuickViewProduct] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Data from Sheets (or fallback to config)
-  const [productos, setProductos] = useState(productosConfig)
+  // Raw data from Sheets (or fallback to config) — overrides are applied below
+  const [rawProductos, setRawProductos] = useState(productosConfig)
+  const [rawLookbook, setRawLookbook] = useState(lookbookConfig)
   const [testimonios, setTestimonios] = useState(testimoniosConfig)
-  const [lookbook, setLookbook] = useState(lookbookConfig)
   const [faqs, setFaqs] = useState(faqsConfig)
   const [siteConfig, setSiteConfig] = useState({ temporada: temporadaActual, promos: promosConfig })
+  const [overridesVersion, setOverridesVersion] = useState(0)
+
+  // Apply admin localStorage overrides on top of raw data
+  const productos = useMemo(
+    () => applyProductOverrides(rawProductos),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rawProductos, overridesVersion]
+  )
+  const lookbook = useMemo(
+    () => applyLookbookOverrides(rawLookbook),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rawLookbook, overridesVersion]
+  )
 
   // Fetch data from Sheets via API route
   useEffect(() => {
     fetch('/api/data')
       .then((res) => res.json())
       .then((data) => {
-        if (data.productos?.length) setProductos(data.productos)
+        if (data.productos?.length) setRawProductos(data.productos)
         if (data.testimonios?.length) setTestimonios(data.testimonios)
-        if (data.lookbook?.length) setLookbook(data.lookbook)
+        if (data.lookbook?.length) setRawLookbook(data.lookbook)
         if (data.faqs?.length) setFaqs(data.faqs)
         if (data.config) setSiteConfig(data.config)
       })
       .catch(() => {
         // Silently fallback to config.js data (already set as default)
       })
+  }, [])
+
+  // Re-apply overrides when admin edits from another tab (same browser)
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (
+        e.key === PRODUCTOS_OVERRIDES_KEY ||
+        e.key === LOOKBOOK_OVERRIDES_KEY ||
+        e.key === LOOKBOOK_ORDER_KEY
+      ) {
+        setOverridesVersion((v) => v + 1)
+      }
+    }
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
   // Load cart from localStorage

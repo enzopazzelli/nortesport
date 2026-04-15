@@ -4,6 +4,8 @@ node_modules/
 # Next.js
 .next/
 out/
+.vercel/
+.turbo/
 
 # Environment
 .env
@@ -24,3 +26,10 @@ NAVY & GREY/
 
 # Debug
 npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Documentos personales / manuales (no van al repo)
+*.docx
+/Manual Administracion - NorteSport.pdf
+/NORTE SPORT.pdf
