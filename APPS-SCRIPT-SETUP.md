@@ -108,6 +108,21 @@ Si en algún momento editás `apps-script.gs` (cualquiera de los dos casos), **n
 
 > Buena noticia: la **URL del Web App no cambia** entre versiones, así que no tenés que tocar `.env.local` ni Vercel cada vez.
 
+#### ⚠️ Si la edición agrega un *scope* nuevo (ej: Drive)
+
+El script original solo tocaba Sheets. Cuando agregamos `upload_image`, el código pasó a usar `DriveApp.getFolderById(...)` — eso requiere un permiso nuevo (acceso a Drive) que el deploy original no tiene.
+
+Cuando hagás "Nueva versión" con código que usa scopes nuevos:
+
+1. Apps Script va a detectar que el script ahora pide más permisos.
+2. La primera invocación que use ese scope (ej: la primera subida de imagen) **va a fallar con un error de autorización**.
+3. Tenés que volver a abrir el editor → ejecutar manualmente cualquier función (botón ▶️ "Ejecutar" en la barra de herramientas, eligiendo `uploadImage` por ejemplo) → Google te muestra una pantalla de autorización con los permisos nuevos → **Autorizar acceso → seleccionar la cuenta dueña → Permitir**.
+4. Después de eso, las invocaciones del Web App vuelven a funcionar.
+
+> Si el script ya está deployado bajo la cuenta de la clienta, **ella** es la que tiene que hacer este paso, no vos. Avisale antes y guidala por los pasos arriba (o mandale un screenshot).
+
+Otra forma equivalente (y a veces más simple): hacer una invocación de prueba que dispare el scope. La pantalla de autorización aparece igual.
+
 ---
 
 ## 3. Configurar variables de entorno en Next.js
@@ -148,15 +163,17 @@ Si los cambios **no** aparecen en Sheets, abrí la consola del navegador. El hel
 
 ## 5. Acciones soportadas
 
-| Acción | Hoja | Qué hace |
-|--------|------|----------|
+| Acción | Hoja / Recurso | Qué hace |
+|--------|----------------|----------|
 | `update_product` | `Productos` | Actualiza columnas de un producto por `ID`. |
+| `add_product` | `Productos` | Agrega un producto nuevo, generando el `ID` en el server. Devuelve `{ ok: true, id }`. |
 | `update_lookbook` | `Lookbook` | Actualiza columnas de un item por `ID`. |
 | `add_lookbook` | `Lookbook` | Agrega un item nuevo, generando el `ID` en el server. Devuelve `{ ok: true, id }`. |
 | `delete_lookbook` | `Lookbook` | Borra una fila por `ID`. (Handler listo, UI no lo expone aún.) |
 | `reorder_lookbook` | `Lookbook` | Reescribe todas las filas en el orden indicado por el array `order`. |
+| `upload_image` | Drive (carpeta de productos) | Sube una imagen base64 a la carpeta `PRODUCT_IMAGES_FOLDER_ID`, la hace pública, y devuelve la URL directa (`lh3.googleusercontent.com/d/...`). |
 
-Productos sólo soporta **update**. Si en el futuro querés add/delete de productos, replicá el patrón de Lookbook en `apps-script.gs` y `lib/sync.js`.
+Productos: soporta **update y add** (no hay delete por UI). Lookbook: soporta todo.
 
 ---
 

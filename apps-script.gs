@@ -10,6 +10,7 @@
 // =====================================================================
 
 const TOKEN = 'CAMBIAR_POR_UN_SECRETO_LARGO_Y_UNICO'
+const PRODUCT_IMAGES_FOLDER_ID = '1Yd7SDFJWeNegn5iyx1wfKm9yK_du5eIj'
 
 function doPost(e) {
   try {
@@ -22,6 +23,8 @@ function doPost(e) {
     switch (data.action) {
       case 'update_product':
         return updateRowById('Productos', data.id, data.changes)
+      case 'add_product':
+        return appendRow('Productos', data.item)
       case 'update_lookbook':
         return updateRowById('Lookbook', data.id, data.changes)
       case 'add_lookbook':
@@ -30,6 +33,8 @@ function doPost(e) {
         return deleteRowById('Lookbook', data.id)
       case 'reorder_lookbook':
         return reorderRows('Lookbook', data.order)
+      case 'upload_image':
+        return uploadImage(data.image)
       default:
         return json({ ok: false, error: 'unknown action: ' + data.action })
     }
@@ -115,6 +120,29 @@ function deleteRowById(sheetName, id) {
     }
   }
   return json({ ok: false, error: 'row not found: ' + id })
+}
+
+function uploadImage(image) {
+  if (!image || !image.base64) {
+    return json({ ok: false, error: 'missing image data' })
+  }
+
+  try {
+    const folder = DriveApp.getFolderById(PRODUCT_IMAGES_FOLDER_ID)
+    const blob = Utilities.newBlob(
+      Utilities.base64Decode(image.base64),
+      image.mimeType || 'image/jpeg',
+      image.name || 'imagen.jpg'
+    )
+    const file = folder.createFile(blob)
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW)
+
+    const fileId = file.getId()
+    const url = 'https://drive.google.com/file/d/' + fileId + '/view'
+    return json({ ok: true, url: url, fileId: fileId })
+  } catch (err) {
+    return json({ ok: false, error: 'upload failed: ' + String(err) })
+  }
 }
 
 function reorderRows(sheetName, order) {

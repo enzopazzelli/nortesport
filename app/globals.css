@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .input {
+    @apply w-full px-3 py-2 border border-border rounded-lg text-sm bg-white text-dark placeholder:text-secondary/60 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent disabled:opacity-50 disabled:bg-bg-alt;
+  }
+}
+
 /* Selection */
 ::selection {
   background-color: #3B82F6;

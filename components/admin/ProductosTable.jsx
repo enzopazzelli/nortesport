@@ -1,17 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Package,
   RotateCcw,
   Check,
   X,
   Pencil,
+  Plus,
   ToggleLeft,
   ToggleRight,
 } from 'lucide-react'
 import { productos as defaultProductos } from '@/lib/defaults'
 import { syncProductUpdate } from '@/lib/sync'
+import NewProductForm from './NewProductForm'
 
 const STORAGE_KEY = 'norte_productos_overrides'
 
@@ -30,12 +32,16 @@ function saveOverrides(overrides) {
 
 export default function ProductosTable() {
   const [products, setProducts] = useState([])
-  const [baseProducts, setBaseProducts] = useState(defaultProductos)
   const [overrides, setOverrides] = useState({})
-  const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState(null)
   const [editField, setEditField] = useState(null) // 'precio' | 'stock'
   const [editValue, setEditValue] = useState('')
+  const [showNewForm, setShowNewForm] = useState(false)
+
+  const categorias = useMemo(
+    () => [...new Set(products.map((p) => p.categoria).filter(Boolean))].sort(),
+    [products]
+  )
 
   useEffect(() => {
     const stored = getStoredOverrides()
@@ -59,12 +65,21 @@ export default function ProductosTable() {
             ...(freshOverrides[p.id] || {}),
           }))
           setProducts(sheetsProducts)
-          setBaseProducts(data.productos)
         }
       })
       .catch(() => {})
-      .finally(() => setLoading(false))
   }, [])
+
+  const handleProductCreated = (product) => {
+    const newProduct = {
+      ...product,
+      imagenes: Array.isArray(product.imagenes) ? product.imagenes : [],
+      talles: typeof product.talles === 'string'
+        ? product.talles.split(',').map((t) => t.trim()).filter(Boolean)
+        : product.talles || [],
+    }
+    setProducts((prev) => [...prev, newProduct])
+  }
 
   const updateOverride = (id, changes) => {
     const newOverrides = {
@@ -128,21 +143,37 @@ export default function ProductosTable() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 text-dark font-semibold text-lg">
           <Package className="w-5 h-5 text-accent" />
           Productos ({products.length})
         </div>
-        {hasOverrides && (
+        <div className="flex items-center gap-2">
+          {hasOverrides && (
+            <button
+              onClick={handleRestore}
+              className="flex items-center gap-1.5 text-sm font-medium text-secondary hover:text-dark px-3 py-2 rounded-lg hover:bg-bg-alt border border-border"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Restaurar originales
+            </button>
+          )}
           <button
-            onClick={handleRestore}
-            className="flex items-center gap-1.5 text-sm font-medium text-secondary hover:text-dark px-3 py-2 rounded-lg hover:bg-bg-alt border border-border"
+            onClick={() => setShowNewForm(true)}
+            className="flex items-center gap-1.5 text-sm font-medium bg-accent hover:bg-accent/90 text-white px-3 py-2 rounded-lg"
           >
-            <RotateCcw className="w-4 h-4" />
-            Restaurar originales
+            <Plus className="w-4 h-4" />
+            Crear producto
           </button>
-        )}
+        </div>
       </div>
+
+      <NewProductForm
+        isOpen={showNewForm}
+        onClose={() => setShowNewForm(false)}
+        categorias={categorias}
+        onCreated={handleProductCreated}
+      />
 
       {/* Table */}
       <div className="border border-border rounded-xl overflow-hidden bg-white">
