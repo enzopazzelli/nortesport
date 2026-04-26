@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LogOut,
   FileSpreadsheet,
+  FileText,
   Image,
   Package,
   ClipboardList,
@@ -20,11 +21,13 @@ import PDFGenerator from '@/components/admin/PDFGenerator'
 import LookbookManager from '@/components/admin/LookbookManager'
 import ProductosTable from '@/components/admin/ProductosTable'
 import PedidosManager from '@/components/admin/PedidosManager'
+import CatalogBuilder from '@/components/admin/CatalogBuilder'
 import { detectPriceColumns } from '@/lib/excel-parser'
 
 const TABS = [
   { id: 'pedidos', label: 'Pedidos', icon: ClipboardList },
-  { id: 'catalogos', label: 'Catálogos', icon: FileSpreadsheet },
+  { id: 'catalogo', label: 'Catálogo PDF', icon: FileText },
+  { id: 'catalogos', label: 'Lista Excel', icon: FileSpreadsheet },
   { id: 'lookbook', label: 'Lookbook', icon: Image },
   { id: 'productos', label: 'Productos', icon: Package },
 ]
@@ -240,6 +243,40 @@ export default function DashboardPage() {
             </div>
 
             <PedidosManager />
+          </div>
+        )}
+
+        {/* Catálogo PDF tab */}
+        {activeTab === 'catalogo' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-dark mb-1">
+                Cat&aacute;logo PDF de productos
+              </h2>
+              <p className="text-secondary text-sm">
+                Gener&aacute; un cat&aacute;logo visual con im&aacute;genes a partir de los productos cargados en la tienda. Pod&eacute;s elegir entre modo p&uacute;blico (precios al p&uacute;blico) o mayorista (precios con descuento, stock visible y c&oacute;digos).
+              </p>
+            </div>
+
+            <div className="bg-accent/5 border border-accent/20 rounded-xl p-5">
+              <div className="flex items-start gap-3">
+                <Info className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+                <div className="text-sm text-secondary space-y-2">
+                  <p className="font-semibold text-dark">C&oacute;mo funciona:</p>
+                  <ol className="list-decimal list-inside space-y-1.5 ml-1">
+                    <li><strong>Eleg&iacute; el modo</strong> &mdash; <em>P&uacute;blico</em> para clientes finales (precios de venta), <em>Mayorista</em> para revendedores (con descuento configurable, stock y c&oacute;digo de producto).</li>
+                    <li><strong>Filtr&aacute; los productos</strong> &mdash; por categor&iacute;a, estado (disponibles o todos) y badge. Tambi&eacute;n pod&eacute;s buscar por nombre.</li>
+                    <li><strong>Excluir productos puntuales</strong> &mdash; click en cualquier producto del listado para excluirlo del cat&aacute;logo final.</li>
+                    <li><strong>Previsualizar o descargar</strong> &mdash; &quot;Generar y previsualizar&quot; abre el PDF en una pesta&ntilde;a nueva para revisarlo. &quot;Descargar directo&quot; lo guarda al toque.</li>
+                  </ol>
+                  <p className="pt-1 text-xs">
+                    Las im&aacute;genes se descargan de Drive en el momento, as&iacute; que la generaci&oacute;n puede tardar 30-60 segundos seg&uacute;n cu&aacute;ntos productos elijas.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <CatalogBuilder />
           </div>
         )}
 
